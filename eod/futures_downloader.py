@@ -25,7 +25,7 @@ def download_futures_hist_prices_from_quandl() -> None:
     :return:
     """
     # start_date = datetime(2017, 1, 1)
-    end_date = datetime.today()
+    end_date = datetime.now()
     start_date = end_date + timedelta(days=-75)
 
     df_futures_meta = pd.read_csv(os.path.join(global_settings.root_path, 'data/config/futures_meta.csv'), index_col=0)
@@ -34,7 +34,7 @@ def download_futures_hist_prices_from_quandl() -> None:
     df_futures_contracts_meta = df_futures_contracts_meta[~df_futures_contracts_meta['Last_Trade_Date'].isnull()]       # remove empty last_trade_date; same as keep_default_na=False
     df_futures_contracts_meta['Last_Trade_Date'] = pd.to_datetime(df_futures_contracts_meta['Last_Trade_Date'])
 
-    futures_hist_prices_dict = dict()
+    futures_hist_prices_dict = {}
     if os.path.isfile(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5')):
         with h5py.File(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'), 'r') as f:
             for k in f.keys():
@@ -57,8 +57,8 @@ def download_futures_hist_prices_from_quandl() -> None:
             df_futures_contract_meta = get_futures_chain(df_futures_contract_meta,  start_date)
 
             for row_idx2, row2 in df_futures_contract_meta.iterrows():
-                if row_idx == 'UX':      # directly from CBOE
-                    try:
+                try:
+                    if row_idx == 'UX':
                         # https://markets.cboe.com/us/futures/market_statistics/historical_data/
                         url = fr'https://markets.cboe.com/us/futures/market_statistics/historical_data/products/csv/VX/{row2["Last_Trade_Date"].strftime("%Y-%m-%d")}/'
                         r = requests.get(url, stream=True)
@@ -69,13 +69,7 @@ def download_futures_hist_prices_from_quandl() -> None:
                         df.name = row_idx2
                         df.index = pd.to_datetime(df.index)
                         df.sort_index(ascending=True, inplace=True)
-                        df_hist_prices = pd.concat([df_hist_prices, df], axis=1, join='outer', sort=True)
-
-                        logging.debug('Contract {} is downloaded'.format(row_idx2))
-                    except:
-                        logging.error('Contract {} is missing'.format(row_idx2))
-                else:
-                    try:
+                    else:
                         quandl_contract = quandl_ticker[:-5] + row_idx2[-5:]
                         df = quandl.get(quandl_contract, start_date=start_date, end_date=end_date,
                                         qopts={'columns': ['Settle']}, authtoken=global_settings.quandl_auth)
@@ -87,24 +81,23 @@ def download_futures_hist_prices_from_quandl() -> None:
                         df.name = row_idx2
                         if not np.isnan(quandl_multiplier):         # consistent with Bloomberg
                             df = df * quandl_multiplier
-                        df_hist_prices = pd.concat([df_hist_prices, df], axis=1, join='outer', sort=True)
+                    df_hist_prices = pd.concat([df_hist_prices, df], axis=1, join='outer', sort=True)
 
-                        logging.debug('Contract {} is downloaded'.format(row_idx2))
-                    except:
-                        logging.error('Contract {} is missing'.format(row_idx2))
-
+                    logging.debug(f'Contract {row_idx2} is downloaded')
+                except:
+                    logging.error(f'Contract {row_idx2} is missing')
                 time.sleep(3)
 
             # update existing dataset
-            if row_idx in futures_hist_prices_dict.keys():
+            if row_idx in futures_hist_prices_dict:
                 df_old = pd.read_hdf(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'), key=row_idx)
                 df_hist_prices = df_hist_prices.combine_first(df_old)
 
             df_hist_prices.sort_index(inplace=True)
             df_hist_prices.to_hdf(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'), key=row_idx)
-            logging.debug('{} is download'.format(row_idx))
+            logging.debug(f'{row_idx} is download')
         except:
-            logging.error('{} failed to download'.format(row_idx))
+            logging.error(f'{row_idx} failed to download')
 
 
 def download_futures_hist_prices_from_barchart(grps) -> None:
@@ -114,7 +107,7 @@ def download_futures_hist_prices_from_barchart(grps) -> None:
     :return:
     """
     # start_date = datetime(2000, 1, 1)
-    end_date = datetime.today()
+    end_date = datetime.now()
     start_date = end_date + timedelta(days=-180)
 
     od = OnDemandClient(api_key=global_settings.barchart_auth, end_point='https://marketdata.websol.barchart.com/')
@@ -124,12 +117,12 @@ def download_futures_hist_prices_from_barchart(grps) -> None:
     df_futures_contracts_meta = pd.read_csv(os.path.join(global_settings.root_path, 'data/config/futures_contract_meta.csv'), keep_default_na=False)
     df_futures_contracts_meta['Last_Trade_Date'] = pd.to_datetime(df_futures_contracts_meta['Last_Trade_Date'])
 
-    futures_hist_prices_dict = dict()
+    futures_hist_prices_dict = {}
     if os.path.isfile(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5')):
         with h5py.File(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'), 'r') as f:
             for k in f.keys():
                 futures_hist_prices_dict[k] = None
-    for k in futures_hist_prices_dict.keys():
+    for k in futures_hist_prices_dict:
         futures_hist_prices_dict[k] = pd.read_hdf(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'), key=k)
 
     for row_idx, row in df_futures_meta.iterrows():
@@ -160,13 +153,13 @@ def download_futures_hist_prices_from_barchart(grps) -> None:
                 logging.info(c + ' skipped')
 
         # update existing dataset
-        if row_idx in futures_hist_prices_dict.keys():
+        if row_idx in futures_hist_prices_dict:
             df_old = pd.read_hdf(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'), key=k)
             df_sym = df_sym.combine_first(df_old)
 
         df_sym.sort_index(inplace=True)
         df_sym.to_hdf(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'), key=row_idx)
-        logging.debug('{} is download'.format(row_idx))
+        logging.debug(f'{row_idx} is download')
 
 def download_vix_futures_from_cboe():
     df_old = None
@@ -175,7 +168,7 @@ def download_vix_futures_from_cboe():
             if 'UX' in f.keys():
                 df_old = pd.read_hdf(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'), key='UX')
 
-    end_date = datetime.today()
+    end_date = datetime.now()
     date_list = [end_date - timedelta(days=x) for x in range(global_settings.lookback_days)]
     df_vix = pd.DataFrame()
     for asofdate in date_list:

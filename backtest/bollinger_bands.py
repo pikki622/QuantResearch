@@ -97,11 +97,10 @@ if __name__ == '__main__':
     test_start_date = datetime(2010,1,1, 8, 30, 0, 0, pytz.timezone('America/New_York'))
     test_end_date = datetime(2019,12,31, 6, 0, 0, 0, pytz.timezone('America/New_York'))
 
-    if do_optimize:          # parallel parameter search
+    if do_optimize:      # parallel parameter search
         params_list = []
         for n_ in [10, 20, 30, 50, 100]:
-            for nd_ in [1.0, 1.5, 2.0, 2.5]:
-                params_list.append({'n': n_, 'ndev': nd_})
+            params_list.extend({'n': n_, 'ndev': nd_} for nd_ in [1.0, 1.5, 2.0, 2.5])
         target_name = 'Sharpe ratio'
         manager = multiprocessing.Manager()
         return_dict = manager.dict()

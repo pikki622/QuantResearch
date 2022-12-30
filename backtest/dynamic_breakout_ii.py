@@ -66,17 +66,15 @@ class DynamicBreakoutII(qt.StrategyBase):
             elif current_price < lb:  # and current_price < ll:
                 self.adjust_position(symbol, size_from=current_size, size_to=target_size, timestamp=self.current_time)
                 print(f'SHORT ORDER SENT, price: {current_price:.2f}, lb: {lb:.2f}, ll: {ll:.2f}, size: {-target_size}')
-        # exit long if price < MA; exit short if price > MA
         elif current_size > 0:
             if current_price < ma:
                 target_size = 0
                 self.adjust_position(symbol, size_from=current_size, size_to=target_size, timestamp=self.current_time)
                 print(f'FLAT LONG ORDER SENT, price: {current_price:.2f}, ma: {ma:.2f}, size: {-current_size}')
-        else:
-            if current_price > ma:
-                target_size = 0
-                self.adjust_position(symbol, size_from=current_size, size_to=target_size, timestamp=self.current_time)
-                print(f'FLAT SHORT ORDER SENT, price: {current_price:.2f}, ma: {ma:.2f}, size: {-current_size}')
+        elif current_price > ma:
+            target_size = 0
+            self.adjust_position(symbol, size_from=current_size, size_to=target_size, timestamp=self.current_time)
+            print(f'FLAT SHORT ORDER SENT, price: {current_price:.2f}, ma: {ma:.2f}, size: {-current_size}')
 
 
 def parameter_search(engine, tag, target_name, return_dict):
@@ -105,10 +103,8 @@ if __name__ == '__main__':
     test_start_date = datetime(2010,1,1, 8, 30, 0, 0, pytz.timezone('America/New_York'))
     test_end_date = datetime(2019,12,31, 6, 0, 0, 0, pytz.timezone('America/New_York'))
 
-    if do_optimize:          # parallel parameter search
-        params_list = []
-        for n_ in [20, 30, 40]:
-                params_list.append({'lookback_days': n_})
+    if do_optimize:      # parallel parameter search
+        params_list = [{'lookback_days': n_} for n_ in [20, 30, 40]]
         target_name = 'Sharpe ratio'
         manager = multiprocessing.Manager()
         return_dict = manager.dict()
@@ -183,7 +179,6 @@ if __name__ == '__main__':
                 positions=df_positions,
                 transactions=df_trades,
                 round_trips=False)
-            plt.show()
         else:
             f1 = plt.figure(1)
             pf.plot_rolling_returns(strat_ret, factor_returns=bm_ret)
@@ -205,4 +200,4 @@ if __name__ == '__main__':
             f6.show()
             f7 = plt.figure(7)
             pf.plot_monthly_returns_dist(strat_ret)
-            plt.show()
+        plt.show()

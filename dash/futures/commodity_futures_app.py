@@ -523,10 +523,10 @@ def update_historical_time_series_market_commodity_futures_tab1(rows_data, rows_
     df = df[lookback_date.date():]
 
     generic_start = 1
-    if (generic_start_str is not None) and (not not generic_start_str):
+    if generic_start_str is not None and generic_start_str:
         generic_start = int(generic_start_str)
     generic_end = df.shape[1]
-    if (generic_end_str is not None) and (not not generic_end_str):
+    if generic_end_str is not None and generic_end_str:
         generic_end = int(generic_end_str)
 
     traces = [go.Scatter(x=df[col].index,
@@ -569,51 +569,49 @@ def update_historical_term_structures_market_commodity_futures_tab1(rows_data, r
     if ':' in sym_root:
         hist_data = inter_comdty_spread_hist_data_dict[sym_root]
         meta_data = inter_comdty_spread_contracts_meta_df[inter_comdty_spread_contracts_meta_df['Root'] == sym_root]
-        meta_data.sort_values('Last_Trade_Date', inplace=True)
     else:
         hist_data = futures_hist_prices_dict[sym_root]
         meta_data = futures_contracts_meta_df[futures_contracts_meta_df['Root'] == sym_root]
-        meta_data.sort_values('Last_Trade_Date', inplace=True)
-
+    meta_data.sort_values('Last_Trade_Date', inplace=True)
     asofdate = hist_data.index[-1]
     s0 = hist_data.loc[asofdate]
     s = s0.to_frame()
 
     start_idx = hist_data.shape[0] - 1
-    if (ione is not None) and (not not ione):
-        t1 = convert_date_input(ione, datetime.today())
+    if ione is not None and ione:
+        t1 = convert_date_input(ione, datetime.now())
         t1 = t1.date()
         dateidx1 = hist_data.index.searchsorted(t1)  # first one greater than or equal to
         s1 = hist_data.iloc[dateidx1]
         s = pd.concat([s, s1], axis=1)
         start_idx = min(dateidx1, start_idx)
 
-    if (itwo is not None) and (not not itwo):
-        t2 = convert_date_input(itwo, datetime.today())
+    if itwo is not None and itwo:
+        t2 = convert_date_input(itwo, datetime.now())
         t2 = t2.date()
         dateidx2 = hist_data.index.searchsorted(t2)  # first one greater than or equal to
         s2 = hist_data.iloc[dateidx2]
         s = pd.concat([s, s2], axis=1)
         start_idx = min(dateidx2, start_idx)
 
-    if (ithree is not None) and (not not ithree):
-        t3 = convert_date_input(ithree, datetime.today())
+    if ithree is not None and ithree:
+        t3 = convert_date_input(ithree, datetime.now())
         t3 = t3.date()
         dateidx3 = hist_data.index.searchsorted(t3)  # first one greater than or equal to
         s3 = hist_data.iloc[dateidx3]
         s = pd.concat([s, s3], axis=1)
         start_idx = min(dateidx3, start_idx)
 
-    if (ifour is not None) and (not not ifour):
-        t4 = convert_date_input(ifour, datetime.today())
+    if ifour is not None and ifour:
+        t4 = convert_date_input(ifour, datetime.now())
         t4 = t4.date()
         dateidx4 = hist_data.index.searchsorted(t4)  # first one greater than or equal to
         s4 = hist_data.iloc[dateidx4]
         s = pd.concat([s, s4], axis=1)
         start_idx = min(dateidx4, start_idx)
 
-    if (ifive is not None) and (not not ifive):
-        t5 = convert_date_input(ifive, datetime.today())
+    if ifive is not None and ifive:
+        t5 = convert_date_input(ifive, datetime.now())
         t5 = t5.date()
         dateidx5 = hist_data.index.searchsorted(t5)  # first one greater than or equal to
         s5 = hist_data.iloc[dateidx5]
@@ -825,8 +823,8 @@ def update_seasonality_curves_market_commodity_futures_tab4(n_clicks, contract1,
     if (contract1 is None) or (not contract1):
         return go.Figure()
 
-    if (contract2 is not None) and (not not contract2):
-        if (contract3 is not None) and (not not contract3):
+    if contract2 is not None and contract2:
+        if contract3 is not None and contract3:
             contracts = [contract1.upper(), contract2.upper(), contract3.upper()]
             weights = [int(weight1), int(weight2), int(weight3)]
         else:
@@ -840,16 +838,11 @@ def update_seasonality_curves_market_commodity_futures_tab4(n_clicks, contract1,
     if ':' in sym_root:
         hist_data = inter_comdty_spread_hist_data_dict[sym_root]
         meta_data = inter_comdty_spread_contracts_meta_df[inter_comdty_spread_contracts_meta_df['Root'] == sym_root]
-        meta_data.sort_values('Last_Trade_Date', inplace=True)
     else:
         hist_data = futures_hist_prices_dict[sym_root]
         meta_data = futures_contracts_meta_df[futures_contracts_meta_df['Root'] == sym_root]
-        meta_data.sort_values('Last_Trade_Date', inplace=True)
-
-    nlookback = 5000
-    if (lookback is not None) and (not not lookback):
-        nlookback = int(lookback)
-
+    meta_data.sort_values('Last_Trade_Date', inplace=True)
+    nlookback = 5000 if lookback is None or not lookback else int(lookback)
     asofdate = hist_data.index[-1]
     s = get_seasonal_contracts(asofdate, contracts, weights, hist_data, meta_data)
     s = s.iloc[-nlookback:]

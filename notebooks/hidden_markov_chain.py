@@ -53,7 +53,11 @@ def viterbi(obs, states, start_p, trans_p, emit_p):
     for t in range(len(V) - 2, -1, -1):
         opt.insert(0, V[t + 1][previous]["prev"])
         previous = V[t + 1][previous]["prev"]
-    print('The steps of states are ' + ' '.join(opt) + ' with highest probability of %s' % max_prob)
+    print(
+        'The steps of states are '
+        + ' '.join(opt)
+        + f' with highest probability of {max_prob}'
+    )
 
 def dptable(V):
         # Print a table of steps from dictionary
@@ -65,7 +69,7 @@ viterbi(obs, states, start_p, trans_p, emit_p)
 
 #################################################### Data #####################################################
 # https://hmmlearn.readthedocs.io/en/latest/auto_examples/plot_hmm_stock_analysis.html
-hist_file = os.path.join('hist/', '%s.csv' % 'SPX Index')
+hist_file = os.path.join('hist/', 'SPX Index.csv')
 spx_price = pd.read_csv(hist_file, header=0, parse_dates=True, sep=',', index_col=0)
 spx_price = spx_price['Close']
 spx_price.name = 'SPX Index'

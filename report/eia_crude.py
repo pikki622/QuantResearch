@@ -74,9 +74,7 @@ def generate_html(today):
     body2 = df_prod.to_html(border=None)
     body3 = df_production.to_html(border=None)
 
-    # --------------------------------------- Create and Send out HTML ------------------------------------------------- #
-
-    html_string = f'''
+    return f'''
     <html>
         <head>
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
@@ -111,5 +109,3 @@ def generate_html(today):
             <div><h5>XB Production+NX-stock==>consumption</div>
         </body>
     </html>'''
-
-    return html_string

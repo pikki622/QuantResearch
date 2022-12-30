@@ -19,15 +19,12 @@ class EndOfMonth(object):
         self.cal = cal
 
     def __call__(self, d):
-        if self.cal.last_monthday(d):
-            return True
-        return False
+        return bool(self.cal.last_monthday(d))
 
 # ------------------ help functions -------------------------------- #
 def minimum_vol_obj(wo, cov):
     w = wo.reshape(-1, 1)
-    sig_p = np.sqrt(np.matmul(w.T, np.matmul(cov, w)))[0, 0]    # portfolio sigma
-    return sig_p
+    return np.sqrt(np.matmul(w.T, np.matmul(cov, w)))[0, 0]
 
 def maximum_sharpe_negative_obj(wo, mu_cov):
     w = wo.reshape(-1, 1)
@@ -50,8 +47,7 @@ def calc_risk_contribution(wo, cov):
     w = wo.reshape(-1, 1)
     sigma = np.sqrt(np.matmul(w.T, np.matmul(cov, w)))[0, 0]
     mrc = np.matmul(cov, w)
-    rc = (w * mrc) / sigma  # element-wise multiplication
-    return rc
+    return (w * mrc) / sigma
 
 def risk_budget_obj(wo, cov_wb):
     w = wo.reshape(-1, 1)
@@ -60,8 +56,7 @@ def risk_budget_obj(wo, cov_wb):
     sig_p = np.sqrt(np.matmul(w.T, np.matmul(cov, w)))[0, 0]  # portfolio sigma
     risk_target = sig_p * wb
     asset_rc = calc_risk_contribution(w, cov)
-    f = np.sum(np.square(asset_rc - risk_target.T))  # sum of squared error
-    return f
+    return np.sum(np.square(asset_rc - risk_target.T))
 
 class PortfolioOptimization(bt.Strategy):
     params = (
@@ -85,7 +80,7 @@ class PortfolioOptimization(bt.Strategy):
         ''' Logging function fot this strategy'''
         if self.params.printlog or doprint:
             dt = dt or self.datas[0].datetime.date(0)
-            print('%s, %s' % (dt.isoformat(), txt))
+            print(f'{dt.isoformat()}, {txt}')
 
     def start(self):
         self.val_start = self.broker.get_cash()  # keep the starting cash
@@ -133,22 +128,18 @@ class PortfolioOptimization(bt.Strategy):
         pass
 
     def notify_timer(self, timer, when, *args, **kwargs):
-        print('{} strategy notify_timer with tid {}, when {} cheat {}'.
-              format(self.data.datetime.datetime(), timer.p.tid, when, timer.p.cheat))
+        print(
+            f'{self.data.datetime.datetime()} strategy notify_timer with tid {timer.p.tid}, when {when} cheat {timer.p.cheat}'
+        )
         if len(self.datas[0]) < self.p.nlookback:       # not enough bars
             return
 
         total_value = self.broker.getvalue()
-        i = 0
         prices = None
-        for data in self.datas:
+        for i, data in enumerate(self.datas):
             price = data.close.get(0, self.p.nlookback)
             price = np.array(price)
-            if i == 0:
-                prices = price
-            else:
-                prices = np.c_[prices, price]
-            i += 1
+            prices = price if i == 0 else np.c_[prices, price]
         rets = prices[1:,:]/prices[0:-1, :]-1.0
         mu = np.mean(rets, axis=0)
         cov = np.cov(rets.T)
@@ -186,8 +177,7 @@ class PortfolioOptimization(bt.Strategy):
             self.log(f'{self.p.model} Optimization failed; {str(e)}')
 
         stock_value = total_value * 0.95
-        i = 0
-        for data in self.datas:
+        for i, data in enumerate(self.datas):
             target_pos = (int)(stock_value * w[i] / data.close[0])
             self.order_target_size(data=data, target=target_pos)
             self.log('REBALANCE ORDER SENT, %s, Price: %.2f, Percentage: %.2f, Target Size: %.2f' %
@@ -195,7 +185,6 @@ class PortfolioOptimization(bt.Strategy):
                           data.close[0],
                           w[i],
                           target_pos))
-            i += 1
 
     def stop(self):
         # calculate the actual returns
@@ -213,9 +202,9 @@ if __name__ == '__main__':
     benchmark = etfs
 
     strategies = ['gmv', 'sharpe', 'diversified', 'risk_parity']
-    dict_results = dict()
+    dict_results = {}
     for sname in strategies:
-        dict_results[sname] = dict()
+        dict_results[sname] = {}
         cerebro = bt.Cerebro()
 
         # Add the Data Feed to Cerebro
@@ -339,8 +328,7 @@ if __name__ == '__main__':
 
     # positions
     fig, ax = plt.subplots(4, 1, figsize=(25, 25))
-    i = 0
-    for s in strategies:
+    for i, s in enumerate(strategies):
         sum_ = dict_results[s]['positions'].sum(axis=1)
         pcts = []
         for etf in etfs:
@@ -349,6 +337,5 @@ if __name__ == '__main__':
         ax[i].stackplot(dict_results[s]['positions'].index, pcts, labels=etfs)
         ax[i].legend(loc='upper left')
         ax[i].title.set_text(s)
-        i += 1
     fig.tight_layout()
     plt.show()

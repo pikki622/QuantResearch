@@ -27,8 +27,8 @@ class BuyAndHoldStrategy(qt.StrategyBase):
 
     def on_tick(self, event):
         print(event.timestamp)
-        symbol = self.symbols[0]
         if not self.invested:
+            symbol = self.symbols[0]
             df_hist = self._data_board.get_hist_price(symbol, event.timestamp)
             close = df_hist.iloc[-1].Close
             target_size = int(self._position_manager.cash / close)

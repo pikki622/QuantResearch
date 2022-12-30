@@ -22,7 +22,7 @@ def generate_html(today):
         txt = td.get_text().strip()
         try:
             dt = datetime.strptime(txt, '%Y-%m-%d')
-            if len(row) > 0:
+            if row:
                 df_row = pd.DataFrame(row, index=[row['Calendar']])
                 df = pd.concat([df, df_row], axis=0)
             row['Calendar'] = dt
@@ -34,7 +34,7 @@ def generate_html(today):
                 continue
             try:
                 row[cols[i]] = txt
-                i = i + 1
+                i += 1
             except:
                 break
     df.set_index('Calendar', inplace=True)
@@ -57,7 +57,7 @@ def generate_html(today):
         txt = td.get_text().strip()
         try:
             dt = datetime.strptime(txt, '%Y-%m-%d')
-            if len(row) > 0:
+            if row:
                 df_row = pd.DataFrame(row, index=[row['Calendar']])
                 df2 = pd.concat([df2, df_row], axis=0)
             row['Calendar'] = dt
@@ -69,7 +69,7 @@ def generate_html(today):
                 continue
             try:
                 row[cols[i]] = txt
-                i = i + 1
+                i += 1
             except:
                 break
     df2.set_index('Calendar', inplace=True)
@@ -78,9 +78,7 @@ def generate_html(today):
     body = df.to_html(border=None)  # .replace('border="1"','')
     body2 = df2.to_html(border=None)  # .replace('border="1"','')
 
-    # --------------------------------------- Create and Send out HTML ------------------------------------------------- #
-
-    html_string = f'''
+    return f'''
     <html>
         <head>
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
@@ -111,5 +109,3 @@ def generate_html(today):
             <div>{body2}</div>
         </body>
     </html>'''
-
-    return html_string

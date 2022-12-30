@@ -29,9 +29,7 @@ def generate_html(today):
     summary = f'<h5>Crude stock {df_ng.iloc[0, 1]}, previous {df_ng.iloc[0, 2]}, change {df_ng.iloc[0, 1] - df_ng.iloc[0, 2]}</h5>'
     body = df_ng.to_html(border=None)#.replace('border="1"','')
 
-    # --------------------------------------- Create and Send out HTML ------------------------------------------------- #
-
-    html_string = f'''
+    return f'''
     <html>
         <head>
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
@@ -62,5 +60,3 @@ def generate_html(today):
             <div>{body}</div>
         </body>
     </html>'''
-
-    return html_string

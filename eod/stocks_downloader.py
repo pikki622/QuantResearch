@@ -23,7 +23,7 @@ def download_stocks_hist_prices() -> None:
     """
     # cache_dir = os.path.dirname(os.path.realpath(__file__))
     # start_date = datetime(2000, 1, 1)
-    end_date = datetime.today()
+    end_date = datetime.now()
     # start_date = end_date.replace(year=end_date.year - 5)  # restriction from IEX
     start_date = end_date + timedelta(days=-global_settings.lookback_days)
 
@@ -43,7 +43,7 @@ def download_stocks_hist_prices() -> None:
         'VIX': '^VIX'
     }, orient='index', columns=['YAHOO'])
 
-    stocks_hist_prices_dict = dict()
+    stocks_hist_prices_dict = {}
     if os.path.isfile(os.path.join(global_settings.root_path, 'data/stocks_historical_prices.h5')):
         with h5py.File(os.path.join(global_settings.root_path,'data/stocks_historical_prices.h5'), 'r') as f:
             for k in f.keys():
@@ -54,27 +54,27 @@ def download_stocks_hist_prices() -> None:
         try:
             #df = pdr.DataReader(name=row['YAHOO'], data_source='yahoo', start=start_date, end=end_date)
             df = yf.download(row['YAHOO'], start=start_date, end=end_date)
-            if row_idx in stocks_hist_prices_dict.keys():
+            if row_idx in stocks_hist_prices_dict:
                 df_old = pd.read_hdf(os.path.join(global_settings.root_path, 'data/stocks_historical_prices.h5'), key=row_idx)
                 df = df.combine_first(df_old)
 
             df.sort_index(inplace=True)
             df.to_hdf(os.path.join(global_settings.root_path, 'data/stocks_historical_prices.h5'), key=row_idx)
 
-            logging.info('{} is downloaded'.format(row_idx))
+            logging.info(f'{row_idx} is downloaded')
             time.sleep(1)
         except:
-            logging.error('{} failed to download'.format(row_idx))
+            logging.error(f'{row_idx} failed to download')
 
 
 def download_stocks_hist_1m_data() -> None:
     # end_date = datetime(2014, 11, 1)
-    end_date = datetime.today()
+    end_date = datetime.now()
     nlookback = -5         # yahoo limit to 30d
 
     df_stocks_meta = pd.read_csv(os.path.join(global_settings.root_path, 'data/config/intraday_stocks.csv'), header=None)
 
-    stocks_hist_intraday_data_dict = dict()
+    stocks_hist_intraday_data_dict = {}
     if os.path.isfile(os.path.join(global_settings.root_path, 'data/stocks_historical_intraday_data.h5')):
         with h5py.File(os.path.join(global_settings.root_path, 'data/stocks_historical_intraday_data.h5'), 'r') as f:
             for k1 in f.keys():
@@ -86,7 +86,7 @@ def download_stocks_hist_1m_data() -> None:
     #         stocks_hist_intraday_data_dict[k1][k2] = pd.read_hdf(os.path.join(global_settings.root_path, 'data/stocks_historical_intraday_data.h5'), key=f'{k1}/{k2}')
 
     logging.info('Start downloading stock stock intraday data')
-    for i in range(nlookback, 0, 1):
+    for i in range(nlookback, 0):
         sd = end_date + timedelta(days=i)
         # sd = datetime(2020, 7, 6)
         ed = sd + timedelta(days=1)
@@ -98,7 +98,7 @@ def download_stocks_hist_1m_data() -> None:
                 print('downloading SPY...')
             try:
                 if sym not in stocks_hist_intraday_data_dict.keys():
-                    stocks_hist_intraday_data_dict[sym] = dict()
+                    stocks_hist_intraday_data_dict[sym] = {}
                 if sd.date() in stocks_hist_intraday_data_dict[sym].keys():       # already saved
                     if sym == 'SPY':
                         print('SPY exists', sd)
@@ -113,19 +113,27 @@ def download_stocks_hist_1m_data() -> None:
                     if sym == 'SPY':
                         print('SPY start time failed', df.index[0])
                     continue
-                if ((df.index[-1].hour != 15) and (df.index[-1].minute != 59)) and ((df.index[-1].hour != 12) and (df.index[-1].minute != 59)):      # corrupted
+                if (
+                    df.index[-1].hour != 15
+                    and df.index[-1].minute != 59
+                    and df.index[-1].hour != 12
+                ):      # corrupted
                     df = df.iloc[:-1, :]      # might have next 9:30
-                    if ((df.index[-1].hour != 15) and (df.index[-1].minute != 59)) and ((df.index[-1].hour != 12) and (df.index[-1].minute != 59)):    
-                        if sym == 'SPY':
-                           print('SPY end time failed', df.index[-1])
-                        continue
+                if (
+                    df.index[-1].hour != 15
+                    and df.index[-1].minute != 59
+                    and df.index[-1].hour != 12
+                ):    
+                    if sym == 'SPY':
+                       print('SPY end time failed', df.index[-1])
+                    continue
                 dt = df.index[0].to_pydatetime().date()
                 df.to_hdf(os.path.join(global_settings.root_path, 'data/stocks_historical_intraday_data.h5'), key=f'{sym}/{dt}')
 
-                logging.info('{} intraday is downloaded'.format(sym))
+                logging.info(f'{sym} intraday is downloaded')
                 time.sleep(5)
             except:
-                logging.error('{} intraday failed to download'.format(sym))
+                logging.error(f'{sym} intraday failed to download')
 
 
 def download_fx_rates_from_ecb() -> None:
@@ -135,8 +143,8 @@ def download_fx_rates_from_ecb() -> None:
                 'FX:USDCAD': 'https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/cad.xml',
                 'FX:USDCNY': 'https://www.ecb.europa.eu/stats/policy_and_exchange_rates/euro_reference_exchange_rates/html/cny.xml'}
 
-    stocks_hist_prices_dict = dict()
-    for k in ecb_dict.keys():
+    stocks_hist_prices_dict = {}
+    for k in ecb_dict:
         try:
             stocks_hist_prices_dict[k] = pd.read_hdf(os.path.join(global_settings.root_path, 'data/stocks_historical_prices.h5'), key=k)
         except:
@@ -175,9 +183,9 @@ def download_fx_rates_from_ecb() -> None:
 
             stocks_hist_prices_dict[k].sort_index(inplace=True)
             stocks_hist_prices_dict[k].to_hdf(os.path.join(global_settings.root_path, 'data/stocks_historical_prices.h5'), key=k)
-            logging.info('{} is downloaded'.format(k))
+            logging.info(f'{k} is downloaded')
         except:
-            logging.info('{} download failed'.format(k))
+            logging.info(f'{k} download failed')
         time.sleep(1)
 
 

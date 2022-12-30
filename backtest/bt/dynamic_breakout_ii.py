@@ -33,7 +33,7 @@ class DynamicBreakoutII(bt.Strategy):
         ''' Logging function fot this strategy'''
         if self.params.printlog or doprint:
             dt = dt or self.datas[0].datetime.date(0)
-            print('%s, %s' % (dt.isoformat(), txt))
+            print(f'{dt.isoformat()}, {txt}')
 
     def start(self):
         self.val_start = self.broker.get_cash()  # keep the starting cash
@@ -84,17 +84,15 @@ class DynamicBreakoutII(bt.Strategy):
         if self.order:
             return
 
-        # check adaptive lookback days
         if len(self.datas[0].close) < self.lookback_days+1:
             return
-        else:
-            today_vol = np.std(self.datas[0].close.get(0, self.lookback_days))
-            yesterday_vol = np.std(self.datas[0].close.get(1, self.lookback_days))
-            delta_vol = (today_vol / yesterday_vol) / today_vol
-            self.lookback_days = round(self.lookback_days * (1+delta_vol), 0)
-            self.lookback_days = int(min(max(self.lookback_days, 20), 60))
-            if len(self.datas[0].close) < self.lookback_days:
-                return
+        today_vol = np.std(self.datas[0].close.get(0, self.lookback_days))
+        yesterday_vol = np.std(self.datas[0].close.get(1, self.lookback_days))
+        delta_vol = (today_vol / yesterday_vol) / today_vol
+        self.lookback_days = round(self.lookback_days * (1+delta_vol), 0)
+        self.lookback_days = int(min(max(self.lookback_days, 20), 60))
+        if len(self.datas[0].close) < self.lookback_days:
+            return
 
         # buy if close price > bollinger upper band and close price > Donchian HH
         # sell if close price < bollinger lower band and close price < Donchian LL
@@ -115,15 +113,13 @@ class DynamicBreakoutII(bt.Strategy):
             elif current_price < lb: #and current_price < ll:
                 self.order = self.order_target_size(target=-target_size)
                 self.log(f'SHORT ORDER SENT, price: {current_price:.2f}, lb: {lb:.2f}, ll: {ll:.2f}, size: {-target_size}')
-        # exit long if price < MA; exit short if price > MA
         elif current_size > 0:
             if current_price < ma:
                 self.order = self.order_target_size(target=0)
                 self.log(f'FLAT LONG ORDER SENT, price: {current_price:.2f}, ma: {ma:.2f}, size: {-current_size}')
-        else:
-            if current_price > ma:
-                self.order = self.order_target_size(target=0)
-                self.log(f'FLAT SHORT ORDER SENT, price: {current_price:.2f}, ma: {ma:.2f}, size: {-current_size}')
+        elif current_price > ma:
+            self.order = self.order_target_size(target=0)
+            self.log(f'FLAT SHORT ORDER SENT, price: {current_price:.2f}, ma: {ma:.2f}, size: {-current_size}')
 
     def stop(self):
         # calculate the actual returns

@@ -123,9 +123,7 @@ if __name__ == '__main__':
     test_start_date = datetime(2010,1,1, 8, 30, 0, 0, pytz.timezone('America/New_York'))
     test_end_date = datetime(2019,12,31, 6, 0, 0, 0, pytz.timezone('America/New_York'))
 
-    if do_optimize:          # parallel parameter search
-        pass
-    else:
+    if not do_optimize:
         strategy = RBreaker()
         strategy.set_capital(init_capital)
         strategy.set_symbols([symbol])
@@ -177,7 +175,6 @@ if __name__ == '__main__':
                 positions=df_positions,
                 transactions=df_trades,
                 round_trips=False)
-            plt.show()
         else:
             f1 = plt.figure(1)
             pf.plot_rolling_returns(strat_ret, factor_returns=bm_ret)
@@ -199,4 +196,4 @@ if __name__ == '__main__':
             f6.show()
             f7 = plt.figure(7)
             pf.plot_monthly_returns_dist(strat_ret)
-            plt.show()
+        plt.show()

@@ -11,7 +11,7 @@ def convert_date_input(input_str, default_date=None):
     :param default_date: datetime.date
     :return:datetime.date
     """
-    ret_date = datetime.today()
+    ret_date = datetime.now()
 
     try:
         if 'Y' in input_str or 'y' in input_str:
@@ -39,6 +39,6 @@ def convert_date_input(input_str, default_date=None):
 
 
 def locate_week():
-    today = datetime.today()
+    today = datetime.now()
     return [today + timedelta(days=i) for i in range(0 - today.weekday(), 7 - today.weekday())]    # week of today, then intersect with datetimeindex
 

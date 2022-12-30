@@ -20,8 +20,7 @@ display(HTML("<style>.container { width:100% !important; }</style>"))
 # ------------------ help functions -------------------------------- #
 def minimum_vol_obj(wo, cov):
     w = wo.reshape(-1, 1)
-    sig_p = np.sqrt(np.matmul(w.T, np.matmul(cov, w)))[0, 0]    # portfolio sigma
-    return sig_p
+    return np.sqrt(np.matmul(w.T, np.matmul(cov, w)))[0, 0]
 
 def maximum_sharpe_negative_obj(wo, mu_cov):
     w = wo.reshape(-1, 1)
@@ -44,8 +43,7 @@ def calc_risk_contribution(wo, cov):
     w = wo.reshape(-1, 1)
     sigma = np.sqrt(np.matmul(w.T, np.matmul(cov, w)))[0, 0]
     mrc = np.matmul(cov, w)
-    rc = (w * mrc) / sigma  # element-wise multiplication
-    return rc
+    return (w * mrc) / sigma
 
 def risk_budget_obj(wo, cov_wb):
     w = wo.reshape(-1, 1)
@@ -54,8 +52,7 @@ def risk_budget_obj(wo, cov_wb):
     sig_p = np.sqrt(np.matmul(w.T, np.matmul(cov, w)))[0, 0]  # portfolio sigma
     risk_target = sig_p * wb
     asset_rc = calc_risk_contribution(w, cov)
-    f = np.sum(np.square(asset_rc - risk_target.T))  # sum of squared error
-    return f
+    return np.sum(np.square(asset_rc - risk_target.T))
 
 
 class PortfolioOptimization(qt.StrategyBase):
@@ -88,10 +85,7 @@ class PortfolioOptimization(qt.StrategyBase):
         for symbol in self.symbols:
             price = self._data_board.get_hist_price(symbol, self.current_time)['Close'].iloc[-self.nlookback:]
             price = np.array(price)
-            if prices is None:
-                prices = price
-            else:
-                prices = np.c_[prices, price]
+            prices = price if prices is None else np.c_[prices, price]
         rets = prices[1:,:]/prices[0:-1, :]-1.0
         mu = np.mean(rets, axis=0)
         cov = np.cov(rets.T)
@@ -126,8 +120,7 @@ class PortfolioOptimization(qt.StrategyBase):
         except Exception as e:
             print(f'{self.model} Optimization failed; {str(e)}')
 
-        i = 0
-        for sym in self.symbols:
+        for i, sym in enumerate(self.symbols):
             current_size = self._position_manager.get_position_size(sym)
             current_price = self._data_board.get_hist_price(sym, self.current_time)['Close'].iloc[-1]
             target_size = (int)(npv * w[i] / current_price)
@@ -137,7 +130,6 @@ class PortfolioOptimization(qt.StrategyBase):
                           current_price,
                           w[i],
                           target_size))
-            i += 1
 
 
 if __name__ == '__main__':
@@ -148,9 +140,9 @@ if __name__ == '__main__':
     test_start_date = datetime(2010,1,1, 8, 30, 0, 0, pytz.timezone('America/New_York'))
     test_end_date = datetime(2019,12,31, 6, 0, 0, 0, pytz.timezone('America/New_York'))
 
-    dict_results = dict()
+    dict_results = {}
     for model in models:
-        dict_results[model] = dict()
+        dict_results[model] = {}
 
         # SPY: S&P 500
         # EFA: MSCI EAFE
@@ -236,8 +228,7 @@ if __name__ == '__main__':
     # positions
     fig, ax = plt.subplots(4, 1, figsize=(25, 25))
     etfs_plus_cash = etfs+['cash']
-    i = 0
-    for m in models:
+    for i, m in enumerate(models):
         sum_ = dict_results[m]['positions'].sum(axis=1)
         pcts = []
         for etf in etfs_plus_cash:
@@ -247,6 +238,5 @@ if __name__ == '__main__':
         ax[i].stackplot(pcts[0].index, pcts, labels=etfs_plus_cash)
         ax[i].legend(loc='upper left')
         ax[i].title.set_text(m)
-        i += 1
     fig.tight_layout()
     plt.show()

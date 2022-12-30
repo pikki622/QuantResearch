@@ -62,22 +62,18 @@ class ComdtySpreadMonthlyRoll(qt.StrategyBase):
                 self.adjust_position(leg1, size_from=0, size_to=-1, timestamp=self.current_time)
                 self.adjust_position(leg2, size_from=0, size_to=1, timestamp=self.current_time)
                 self.holding_contract = leg1
-        else:
-            if self.holding_contract is None:      # empty
-                print(f'{self.current_time}, dte {dte}, sell {leg1new} buy {leg2new}')
-                self.adjust_position(leg1new, size_from=0, size_to=-1, timestamp=self.current_time)
-                self.adjust_position(leg2new, size_from=0, size_to=1, timestamp=self.current_time)
-                self.holding_contract = leg1new
-            else:
-                if self.holding_contract == leg1new:     # already rolled this month
-                    pass
-                else:
-                    print(f'{self.current_time}, dte {dte}, roll short spread {leg1}-{leg2} to {leg1new}-{leg2new}')
-                    self.adjust_position(leg1, size_from=-1, size_to=0, timestamp=self.current_time)
-                    self.adjust_position(leg2, size_from=1, size_to=0, timestamp=self.current_time)
-                    self.adjust_position(leg1new, size_from=0, size_to=-1, timestamp=self.current_time)
-                    self.adjust_position(leg2new, size_from=0, size_to=1, timestamp=self.current_time)
-                    self.holding_contract = leg1new
+        elif self.holding_contract is None:      # empty
+            print(f'{self.current_time}, dte {dte}, sell {leg1new} buy {leg2new}')
+            self.adjust_position(leg1new, size_from=0, size_to=-1, timestamp=self.current_time)
+            self.adjust_position(leg2new, size_from=0, size_to=1, timestamp=self.current_time)
+            self.holding_contract = leg1new
+        elif self.holding_contract != leg1new:
+            print(f'{self.current_time}, dte {dte}, roll short spread {leg1}-{leg2} to {leg1new}-{leg2new}')
+            self.adjust_position(leg1, size_from=-1, size_to=0, timestamp=self.current_time)
+            self.adjust_position(leg2, size_from=1, size_to=0, timestamp=self.current_time)
+            self.adjust_position(leg1new, size_from=0, size_to=-1, timestamp=self.current_time)
+            self.adjust_position(leg2new, size_from=0, size_to=1, timestamp=self.current_time)
+            self.holding_contract = leg1new
 
 
 def parameter_search(symbol, init_capital, sd, ed, df_data, params, target_name, return_dict):
@@ -113,16 +109,21 @@ if __name__ == '__main__':
     df_future.index = df_future.index.tz_localize('US/Eastern')
     test_start_date = datetime(2019, 1, 1, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
     test_end_date = datetime(2021, 12, 30, 0, 0, 0, 0, pytz.timezone('US/Eastern'))
-    
+
     init_capital = 50.0
-    if do_optimize:          # parallel parameter search
+    if do_optimize:      # parallel parameter search
         params_list = []
         for n_roll_ahead in range(20):
             for n_leg1 in range(12):
-                for n_leg2 in range(12):
-                    if n_leg1 >= n_leg2:
-                        continue
-                    params_list.append({'n_roll_ahead': n_roll_ahead, 'n_leg1': n_leg1, 'n_leg2': n_leg2})
+                params_list.extend(
+                    {
+                        'n_roll_ahead': n_roll_ahead,
+                        'n_leg1': n_leg1,
+                        'n_leg2': n_leg2,
+                    }
+                    for n_leg2 in range(12)
+                    if n_leg1 < n_leg2
+                )
         target_name = 'Sharpe ratio'
         manager = multiprocessing.Manager()
         return_dict = manager.dict()

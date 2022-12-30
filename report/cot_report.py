@@ -24,9 +24,7 @@ def generate_html(today):
     title = '<h3>Weekly COT Report</h3>'
     summary = '<a href="https://www.tradingster.com/cot/futures/fin/13874%2B">tradingster or quikstrike</a>'
 
-    # --------------------------------------- Create and Send out HTML ------------------------------------------------- #
-
-    html_string = f'''
+    return f'''
     <html>
         <head>
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
@@ -56,5 +54,3 @@ def generate_html(today):
             <div>{summary}</div>
         </body>
     </html>'''
-
-    return html_string

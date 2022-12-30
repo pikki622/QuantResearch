@@ -31,7 +31,7 @@ class MACross(bt.Strategy):
         ''' Logging function fot this strategy'''
         if self.params.printlog or doprint:
             dt = dt or self.datas[0].datetime.date(0)
-            print('%s, %s' % (dt.isoformat(), txt))
+            print(f'{dt.isoformat()}, {txt}')
 
     def start(self):
         self.val_start = self.broker.get_cash()  # keep the starting cash
@@ -96,20 +96,18 @@ class MACross(bt.Strategy):
                          (self.dataclose[0],
                           self.sma[0],
                           self.getsizing(isbuy=False)))
-        # close position;
-        else:
-            if self.dataclose[0] > self.sma[0] and self.position.size < 0:
-                self.order = self.buy()
-                self.log('BUY ORDER SENT, Price: %.2f, SMA: %.2f. Size: %.2f' %
-                         (self.dataclose[0],
-                          self.sma[0],
-                          self.getsizing(isbuy=True)))
-            elif self.dataclose[0] < self.sma[0] and self.position.size > 0:
-                self.order = self.sell()
-                self.log('SELL ORDER SENT, Price: %.2f, SMA: %.2f. Size: %.2f' %
-                         (self.dataclose[0],
-                          self.sma[0],
-                          self.getsizing(isbuy=False)))
+        elif self.dataclose[0] > self.sma[0] and self.position.size < 0:
+            self.order = self.buy()
+            self.log('BUY ORDER SENT, Price: %.2f, SMA: %.2f. Size: %.2f' %
+                     (self.dataclose[0],
+                      self.sma[0],
+                      self.getsizing(isbuy=True)))
+        elif self.dataclose[0] < self.sma[0] and self.position.size > 0:
+            self.order = self.sell()
+            self.log('SELL ORDER SENT, Price: %.2f, SMA: %.2f. Size: %.2f' %
+                     (self.dataclose[0],
+                      self.sma[0],
+                      self.getsizing(isbuy=False)))
 
     def stop(self):
         # calculate the actual returns

@@ -102,11 +102,10 @@ if __name__ == '__main__':
     test_start_date = datetime(2010,1,1, 8, 30, 0, 0, pytz.timezone('America/New_York'))
     test_end_date = datetime(2019,12,31, 6, 0, 0, 0, pytz.timezone('America/New_York'))
 
-    if do_optimize:          # parallel parameter search
+    if do_optimize:      # parallel parameter search
         params_list = []
         for n_ in [3, 4, 5, 10]:
-            for k_ in [0.4, 0.5, 0.6]:
-                params_list.append({'n': n_, 'k1': k_, 'k2': k_})
+            params_list.extend({'n': n_, 'k1': k_, 'k2': k_} for k_ in [0.4, 0.5, 0.6])
         target_name = 'Sharpe ratio'
         manager = multiprocessing.Manager()
         return_dict = manager.dict()
@@ -181,7 +180,6 @@ if __name__ == '__main__':
                 positions=df_positions,
                 transactions=df_trades,
                 round_trips=False)
-            plt.show()
         else:
             f1 = plt.figure(1)
             pf.plot_rolling_returns(strat_ret, factor_returns=bm_ret)
@@ -203,4 +201,4 @@ if __name__ == '__main__':
             f6.show()
             f7 = plt.figure(7)
             pf.plot_monthly_returns_dist(strat_ret)
-            plt.show()
+        plt.show()

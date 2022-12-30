@@ -20,10 +20,9 @@ b_0 = 0.5
 sigma_a_0 = 0.5
 sigma_b_0 = 0.5
 beta_0 = np.array([[a_0], [b_0]])
-sigma_beta_0 = np.array([[sigma_a_0*sigma_a_0, 0], [0, sigma_b_0*sigma_b_0]])
+sigma_beta_0 = np.array([[sigma_a_0**2, 0], [0, sigma_b_0**2]])
 
-beta_recorder = []           # record parameter beta
-beta_recorder.append(beta_0)
+beta_recorder = [beta_0]
 for pair in range(250):       # 500 points means 250 pairs
     x1 = x[pair*2]
     x2 = x[pair*2+1]

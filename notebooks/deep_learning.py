@@ -53,10 +53,7 @@ def neuron_layer(X, n_neurons, name, activation=None):
         W = tf.Variable(init, name="weights")
         b = tf.Variable(tf.zeros([n_neurons]), name="biases")
         z = tf.matmul(X, W) + b
-        if activation == "relu":
-            return tf.nn.relu(z)
-        else:
-            return z
+        return tf.nn.relu(z) if activation == "relu" else z
 
 import tensorflow as tf
 n_inputs = 28*28

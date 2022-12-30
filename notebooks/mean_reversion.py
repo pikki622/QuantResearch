@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime, date
 
-hist_file = os.path.join('hist/', '%s.csv' % 'USDCAD Curncy')
+hist_file = os.path.join('hist/', 'USDCAD Curncy.csv')
 usd_cad = pd.read_csv(hist_file, header=0, parse_dates=True, sep=',', index_col=0)
 usd_cad = usd_cad['Price']
 usd_cad.name = 'USDCAD Curncy'
@@ -41,7 +41,7 @@ def hurst(ts):
     # Return the Hurst exponent from the polyfit output
     return poly[0] * 2.0
 
-print("Hurst(USDCAD):   %s" % hurst(np.log(usd_cad)))
+print(f"Hurst(USDCAD):   {hurst(np.log(usd_cad))}")
 
 ################################################# Variance Ratio #####################################################
 def normcdf(X):
@@ -59,11 +59,11 @@ def vratio(a, lag=2, cor='hom'):
     b = (np.std((a[2:]) - (a[1:-1]))) ** 2
 
     n = float(len(a))
-    mu = sum(a[1:len(a)] - a[:-1]) / n
+    mu = sum(a[1:] - a[:-1]) / n
     m = (n - lag + 1) * (1 - lag / n)
     #   print mu, m, lag
-    b = sum(np.square(a[1:len(a)] - a[:len(a) - 1] - mu)) / (n - 1)
-    t = sum(np.square(a[lag:len(a)] - a[:len(a) - lag] - lag * mu)) / m
+    b = sum(np.square(a[1:] - a[:-1] - mu)) / (n - 1)
+    t = sum(np.square(a[lag:] - a[:len(a) - lag] - lag * mu)) / m
     vratio = t / (lag * b)
 
     la = float(lag)
@@ -74,10 +74,10 @@ def vratio(a, lag=2, cor='hom'):
 
     elif cor == 'het':
         varvrt = 0
-        sum2 = sum(np.square(a[1:len(a)] - a[:len(a) - 1] - mu))
+        sum2 = sum(np.square(a[1:] - a[:-1] - mu))
         for j in range(lag - 1):
-            sum1a = np.square(a[j + 1:len(a)] - a[j:len(a) - 1] - mu)
-            sum1b = np.square(a[1:len(a) - j] - a[0:len(a) - j - 1] - mu)
+            sum1a = np.square(a[j + 1:] - a[j:-1] - mu)
+            sum1b = np.square(a[1:len(a) - j] - a[:len(a) - j - 1] - mu)
             sum1 = np.dot(sum1a, sum1b)
             delta = sum1 / (sum2 ** 2)
             varvrt = varvrt + ((2 * (la - j) / la) ** 2) * delta
@@ -100,7 +100,7 @@ df_delta = df_delta.values.reshape(len(df_delta),1)                    # sklearn
 df_lag = df_lag.values.reshape(len(df_lag),1)
 lin_reg_model.fit(df_lag[1:], df_delta[1:])                           # skip first line nan
 half_life = -np.log(2) / lin_reg_model.coef_.item()
-print ('Half life:       %s' % half_life)           #  260.65118856658813
+print(f'Half life:       {half_life}')
 
 ################################################## Linear Scaling-in #################################################
 # in source/straetgy/mystrategy folder

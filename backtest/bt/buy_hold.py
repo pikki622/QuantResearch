@@ -11,7 +11,7 @@ class BuyAndHold(bt.Strategy):
     def log(self, txt, dt=None):
         ''' Logging function fot this strategy'''
         dt = dt or self.datas[0].datetime.date(0)
-        print('%s, %s' % (dt.isoformat(), txt))
+        print(f'{dt.isoformat()}, {txt}')
 
     def start(self):
         self.val_start = self.broker.get_cash()  # keep the starting cash

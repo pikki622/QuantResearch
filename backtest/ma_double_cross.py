@@ -46,12 +46,16 @@ class MADoubleCross(qt.StrategyBase):
         if short_sma > long_sma and self.current_position <= 0:
             target_size = int((self._position_manager.cash + self.current_position * df_hist['Close'].iloc[-1])/df_hist['Close'].iloc[-1])       # buy to notional
             self.adjust_position(symbol, size_from=self.current_position, size_to=target_size, timestamp=self.current_time)
-            print("Long: %s, short_sma %s, long_sma %s, price %s, trade %s, new position %s" % (self.current_time, str(short_sma), str(long_sma), str(current_price), str(target_size-self.current_position), str(target_size)))
+            print(
+                f"Long: {self.current_time}, short_sma {str(short_sma)}, long_sma {str(long_sma)}, price {str(current_price)}, trade {str(target_size - self.current_position)}, new position {target_size}"
+            )
             self.current_position = target_size
         elif short_sma < long_sma and self.current_position >= 0:
             target_size = int((self._position_manager.cash + self.current_position * df_hist['Close'].iloc[-1])/df_hist['Close'].iloc[-1])*(-1)    # sell to notional
             self.adjust_position(symbol, size_from=self.current_position, size_to=target_size, timestamp=self.current_time)
-            print("Short: %s, short_sma %s, long_sma %s, price %s, trade %s, new position %s" % (self.current_time, str(short_sma), str(long_sma), str(current_price), str(target_size-self.current_position), str(target_size)))
+            print(
+                f"Short: {self.current_time}, short_sma {str(short_sma)}, long_sma {str(long_sma)}, price {str(current_price)}, trade {str(target_size - self.current_position)}, new position {str(target_size)}"
+            )
             self.current_position = target_size
 
 
@@ -95,13 +99,14 @@ if __name__ == '__main__':
         data = dict_hist_data['ESU0 FUT GLOBEX']
         data.index = data.index.tz_localize('America/New_York')  # US/Eastern, UTC
 
-    if do_optimize:          # parallel parameter search
+    if do_optimize:      # parallel parameter search
         params_list = []
         for sw in [10, 20, 30, 50, 100, 200]:
-            for lw in [10, 20, 30, 50, 100, 200]:
-                if lw <= sw:
-                    continue
-                params_list.append({'short_window': sw, 'long_window': lw})
+            params_list.extend(
+                {'short_window': sw, 'long_window': lw}
+                for lw in [10, 20, 30, 50, 100, 200]
+                if lw > sw
+            )
         target_name = 'Sharpe ratio'
         manager = multiprocessing.Manager()
         return_dict = manager.dict()
@@ -142,10 +147,13 @@ if __name__ == '__main__':
         # ------------------------- Evaluation and Plotting -------------------------------------- #
         strat_ret = ds_equity.pct_change().dropna()
         strat_ret.name = 'strat'
-        if not is_intraday:
-            bm = qt.util.read_ohlcv_csv(os.path.join('../data/', f'{benchmark}.csv'))
-        else:
-            bm = data      # buy and hold
+        bm = (
+            data
+            if is_intraday
+            else qt.util.read_ohlcv_csv(
+                os.path.join('../data/', f'{benchmark}.csv')
+            )
+        )
         bm_ret = bm['Close'].pct_change().dropna()
         bm_ret.index = pd.to_datetime(bm_ret.index)
         bm_ret = bm_ret[strat_ret.index]

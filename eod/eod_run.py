@@ -23,6 +23,7 @@
 ##################################################
 
 """
+
 import os
 import io
 import time
@@ -42,7 +43,7 @@ from misc_downloader import download_treasury_curve_from_gov, download_option_st
 from curve_constructor import construct_inter_commodity_spreads, construct_comdty_generic_hist_prices, construct_inter_comdty_generic_hist_prices, construct_curve_spread_fly
 import data_loader
 
-today = datetime.today()
+today = datetime.now()
 # os.chdir(global_settings.root_path)
 script = os.path.basename(__file__).split('.')[0]
 
@@ -193,20 +194,27 @@ def main(args):
     # ------------- copy if valid -------------------------- #
     if args.backup:
         logging.info('-------- Backup data h5 --------')
-        is_valid = check_h5_file(os.path.join(global_settings.root_path, 'data/misc.h5'))
-        if is_valid:
+        if is_valid := check_h5_file(
+            os.path.join(global_settings.root_path, 'data/misc.h5')
+        ):
             logging.info('-------- misc backed up --------')
             copyfile(os.path.join(global_settings.root_path, 'data/misc.h5'), os.path.join(global_settings.root_path, 'data/misc_bak.h5'))
         else:
             logging.error('-------- misc corrupted --------')
-        is_valid = check_h5_file(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'))
-        if is_valid:
+        if is_valid := check_h5_file(
+            os.path.join(
+                global_settings.root_path, 'data/futures_historical_prices.h5'
+            )
+        ):
             logging.info('-------- futures backed up --------')
             copyfile(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'), os.path.join(global_settings.root_path, 'data/futures_historical_prices_bak.h5'))
         else:
             logging.error('-------- futures corrupted --------')
-        is_valid = check_h5_file(os.path.join(global_settings.root_path, 'data/stocks_historical_prices.h5'))
-        if is_valid:
+        if is_valid := check_h5_file(
+            os.path.join(
+                global_settings.root_path, 'data/stocks_historical_prices.h5'
+            )
+        ):
             logging.info('-------- stocks backed up --------')
             copyfile(os.path.join(global_settings.root_path, 'data/stocks_historical_prices.h5'), os.path.join(global_settings.root_path, 'data/stocks_historical_prices_bak.h5'))
         else:
@@ -214,7 +222,7 @@ def main(args):
 
     end = time.time()
     run_time = round((end - start) / 60.0, 2)
-    logging.info('Performance time: {} min'.format(run_time))
+    logging.info(f'Performance time: {run_time} min')
 
 
 if __name__ == '__main__':
