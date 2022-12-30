@@ -28,9 +28,7 @@ class EndOfMonth(object):
         self.cal = cal
 
     def __call__(self, d):
-        if self.cal.last_monthday(d):
-            return True
-        return False
+        return bool(self.cal.last_monthday(d))
 
 
 class MebaneFaberTAA(bt.Strategy):
@@ -55,7 +53,7 @@ class MebaneFaberTAA(bt.Strategy):
         ''' Logging function fot this strategy'''
         if self.params.printlog or doprint:
             dt = dt or self.datas[0].datetime.date(0)
-            print('%s, %s' % (dt.isoformat(), txt))
+            print(f'{dt.isoformat()}, {txt}')
 
     def start(self):
         self.val_start = self.broker.get_cash()  # keep the starting cash
@@ -102,8 +100,9 @@ class MebaneFaberTAA(bt.Strategy):
         pass
 
     def notify_timer(self, timer, when, *args, **kwargs):
-        print('{} strategy notify_timer with tid {}, when {} cheat {}'.
-              format(self.data.datetime.datetime(), timer.p.tid, when, timer.p.cheat))
+        print(
+            f'{self.data.datetime.datetime()} strategy notify_timer with tid {timer.p.tid}, when {when} cheat {timer.p.cheat}'
+        )
         if len(self.datas[0]) < self.p.nslow:       # not enough bars
             return
 

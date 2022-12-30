@@ -23,14 +23,14 @@ def construct_inter_commodity_spreads() -> None:
     df_futures_contracts_meta = df_futures_contracts_meta.groupby('Root')
 
     start_year = 2000
-    end_year = datetime.today().year + 30  # 30 year, to be conservative
+    end_year = datetime.now().year + 30
 
-    futures_data_dict = dict()
+    futures_data_dict = {}
     if os.path.isfile(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5')):
         with h5py.File(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'), 'r') as f:
             for k in f.keys():
                 futures_data_dict[k] = None
-    for k in futures_data_dict.keys():
+    for k in futures_data_dict:
         futures_data_dict[k] = pd.read_hdf(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'), key=k)
 
     inter_comdty_spread_hist_data_dict = {}
@@ -44,12 +44,12 @@ def construct_inter_commodity_spreads() -> None:
         gen_month1 = df_futures_meta.loc[Leg1, 'FUT_GEN_MONTH']
         gen_month2 = df_futures_meta.loc[Leg2, 'FUT_GEN_MONTH']
         common_months = list(set(gen_month1).intersection(set(gen_month2)))
-        sym_root = '{}:{}:{}:{}:'.format(Leg1, Leg2, round(weight1, 4), round(weight2, 4))
+        sym_root = f'{Leg1}:{Leg2}:{round(weight1, 4)}:{round(weight2, 4)}:'
 
         hist_data_spread = pd.DataFrame()
-        if Leg3:        #if isinstance(row['Leg3'], str):
+        if Leg3:#if isinstance(row['Leg3'], str):
             weight3 = float(row['Weight3'])
-            sym_root = '{}:{}:{}:{}:{}:{}:'.format(Leg1, Leg2, Leg3, round(weight1, 4), round(weight2, 4), round(weight3, 4))
+            sym_root = f'{Leg1}:{Leg2}:{Leg3}:{round(weight1, 4)}:{round(weight2, 4)}:{round(weight3, 4)}:'
             gen_month3 = df_futures_meta.loc[Leg3, 'FUT_GEN_MONTH']
             common_months = list(set(common_months).intersection(set(gen_month3)))
 
@@ -92,13 +92,13 @@ def construct_inter_commodity_spreads() -> None:
                     hist_data_spread = pd.concat([hist_data_spread, s], axis=1, sort=True)
                     df_2 = pd.DataFrame(row_dict, index=[s.name])
                     meta_data_spread = meta_data_spread.append(df_2)
-                    logging.debug('{} {} {} constructed'.format(sym_root, yr, mth))
+                    logging.debug(f'{sym_root} {yr} {mth} constructed')
                 except:
-                    logging.debug('{} {} {} passed'.format(sym_root, yr, mth))
+                    logging.debug(f'{sym_root} {yr} {mth} passed')
 
         inter_comdty_spread_hist_data_dict[sym_root] = hist_data_spread
         inter_comdty_spread_hist_data_dict[sym_root].to_hdf(os.path.join(global_settings.root_path, 'data/inter_comdty_spread_historical_prices.h5'), key=sym_root)
-        logging.info('{} is constructed'.format(sym_root))
+        logging.info(f'{sym_root} is constructed')
 
     meta_data_spread.sort_values(by='Last_Trade_Date', inplace=True,  axis=0, ascending=True)
     meta_data_spread.to_csv(os.path.join(global_settings.root_path, 'data/config/inter_comdty_spread_contract_meta.csv'), index=True)
@@ -118,12 +118,12 @@ def construct_comdty_generic_hist_prices() -> None:
     df_futures_contracts_meta['Last_Trade_Date'] = pd.to_datetime(df_futures_contracts_meta['Last_Trade_Date'])
     df_futures_contracts_meta = df_futures_contracts_meta.groupby('Root')
 
-    futures_data_dict = dict()
+    futures_data_dict = {}
     if os.path.isfile(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5')):
         with h5py.File(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'), 'r') as f:
             for k in f.keys():
                 futures_data_dict[k] = None
-    for k in futures_data_dict.keys():
+    for k in futures_data_dict:
         futures_data_dict[k] = pd.read_hdf(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'), key=k)
 
     for idx, _ in df_futures_meta.iterrows():
@@ -132,9 +132,9 @@ def construct_comdty_generic_hist_prices() -> None:
             gen = get_generic_futures_hist_data(futures_data_dict[root_sym], df_futures_contracts_meta.get_group(root_sym))
             generic_futures_hist_prices_dict[root_sym] = gen
             generic_futures_hist_prices_dict[root_sym].to_hdf(os.path.join(global_settings.root_path, 'data/futures_generic_historical_prices.h5'), key=root_sym)
-            logging.info('{} generic prices generated'.format(root_sym))
+            logging.info(f'{root_sym} generic prices generated')
         except:
-            logging.error('{} failed to generate generic prices'.format(root_sym))
+            logging.error(f'{root_sym} failed to generate generic prices')
 
 
 def construct_inter_comdty_generic_hist_prices() -> None:
@@ -148,12 +148,12 @@ def construct_inter_comdty_generic_hist_prices() -> None:
     df_futures_contracts_meta['Last_Trade_Date'] = pd.to_datetime(df_futures_contracts_meta['Last_Trade_Date'])
     df_futures_contracts_meta = df_futures_contracts_meta.groupby('Root')
 
-    inter_comdty_spread_hist_data_dict = dict()
+    inter_comdty_spread_hist_data_dict = {}
     if os.path.isfile(os.path.join(global_settings.root_path, 'data/inter_comdty_spread_historical_prices.h5')):
         with h5py.File(os.path.join(global_settings.root_path, 'data/inter_comdty_spread_historical_prices.h5'), 'r') as f:
             for k in f.keys():
                 inter_comdty_spread_hist_data_dict[k] = None
-    for k in inter_comdty_spread_hist_data_dict.keys():
+    for k in inter_comdty_spread_hist_data_dict:
         inter_comdty_spread_hist_data_dict[k] = pd.read_hdf(os.path.join(global_settings.root_path, 'data/inter_comdty_spread_historical_prices.h5'), key=k)
 
     for root_sym, group in df_futures_contracts_meta:
@@ -162,9 +162,9 @@ def construct_inter_comdty_generic_hist_prices() -> None:
             gen = get_generic_futures_hist_data(inter_comdty_spread_hist_data_dict[root_sym], group)
             generic_inter_comdty_hist_prices_dict[root_sym] = gen
             generic_inter_comdty_hist_prices_dict[root_sym].to_hdf(os.path.join(global_settings.root_path, 'data/inter_comdty_spread_generic_historical_prices.h5'), key=root_sym)
-            logging.info('{} generic prices generated'.format(root_sym))
+            logging.info(f'{root_sym} generic prices generated')
         except:
-            logging.error('{} failed to generate generic prices'.format(root_sym))
+            logging.error(f'{root_sym} failed to generate generic prices')
 
 
 def construct_curve_spread_fly():

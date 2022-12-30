@@ -46,8 +46,7 @@ def proposal_function(beta):
     b = beta[1]
     a_new = np.random.normal(a, 0.5)
     b_new = np.random.normal(b, 0.5)
-    beta_new = [a_new, b_new]
-    return beta_new
+    return [a_new, b_new]
 
 # run the Monte Carlo
 beta_0 = [0.5, 0.5]        # start value
@@ -55,7 +54,7 @@ results = np.zeros([50000,2])            # record the results
 results[0,0] = beta_0[0]
 results[0, 1] = beta_0[1]
 for step in range(1, 50000):               # loop 50,000 times
-    print('step: {}'.format(step))
+    print(f'step: {step}')
 
     beta_old = results[step-1, :]
     beta_proposal = proposal_function(beta_old)

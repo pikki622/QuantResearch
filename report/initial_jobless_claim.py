@@ -21,7 +21,7 @@ def generate_html(today):
         txt = td.get_text().strip()
         try:
             dt = datetime.strptime(txt, '%Y-%m-%d')
-            if len(row) > 0:
+            if row:
                 df_row = pd.DataFrame(row, index=[row['Calendar']])
                 df = pd.concat([df, df_row], axis=0)
             row['Calendar'] = dt
@@ -33,7 +33,7 @@ def generate_html(today):
                 continue
             try:
                 row[cols[i]] = txt
-                i = i + 1
+                i += 1
             except:
                 break
     df.set_index('Calendar', inplace=True)
@@ -47,9 +47,7 @@ def generate_html(today):
     summary = f'<h5>Actual {df[df.Actual != ""].Actual.iloc[-1]}, forecast {df[df.Actual != ""].Consensus.iloc[-1]}, previous {df[df.Actual != ""].Previous.iloc[-1]}</h5>'
     body = df.to_html(border=None)#.replace('border="1"','')
 
-    # --------------------------------------- Create and Send out HTML ------------------------------------------------- #
-
-    html_string = f'''
+    return f'''
     <html>
         <head>
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
@@ -80,5 +78,3 @@ def generate_html(today):
             <div>{body}</div>
         </body>
     </html>'''
-
-    return html_string

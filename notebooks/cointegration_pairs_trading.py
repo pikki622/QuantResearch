@@ -7,12 +7,12 @@ import matplotlib.pyplot as plt
 from datetime import datetime, date
 
 #################################################### Data #####################################################
-hist_file = os.path.join('hist/', '%s.csv' % 'EWA US Equity')
+hist_file = os.path.join('hist/', 'EWA US Equity.csv')
 ewa_price = pd.read_csv(hist_file, header=0, parse_dates=True, sep=',', index_col=0)
 ewa_price = ewa_price['Price']
 ewa_price.name = 'EWA US Equity'
 
-hist_file = os.path.join('hist/', '%s.csv' % 'EWC US Equity')
+hist_file = os.path.join('hist/', 'EWC US Equity.csv')
 ewc_price = pd.read_csv(hist_file, header=0, parse_dates=True, sep=',', index_col=0)
 ewc_price = ewc_price['Price']
 ewc_price.name = 'EWC US Equity'

@@ -24,9 +24,7 @@ def generate_html(today):
     title = '<h3>Monthly Consumer Confidence</h3>'
     body = df.to_html(border=None)  # .replace('border="1"','')
 
-    # --------------------------------------- Create and Send out HTML ------------------------------------------------- #
-
-    html_string = f'''
+    return f'''
     <html>
         <head>
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
@@ -56,5 +54,3 @@ def generate_html(today):
             <div>{body}</div>
         </body>
     </html>'''
-
-    return html_string

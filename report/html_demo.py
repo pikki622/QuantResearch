@@ -33,9 +33,8 @@ def generate_html():
     data = [['AAPL',10],['GOOGL',12],['AMZN',13]]
     df = pd.DataFrame(data,columns=['Name','RSI'])
     div_table1 = df.to_html()
-    # --------------------------------------- Create and Send out HTML ------------------------------------------------- #
-
-    html_string = '''
+    return (
+        '''
     <html>
         <head>
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
@@ -50,7 +49,9 @@ def generate_html():
             <h2>The other solution is cloud based, make_subplotsmore interactive</h2>
             <h2>This in my opinion is more suitable for more static, like daily updates</h2>
             <div>
-                ''' + div_table1 + '''
+                '''
+        + div_table1
+        + '''
             </div>
             
             <h2>...more...</h2>
@@ -58,8 +59,7 @@ def generate_html():
             </div>
         </body>
     </html>'''
-
-    return html_string
+    )
     #
     # with open('trading_opportunities.html', 'w') as f:
     #     f.write(html_string)

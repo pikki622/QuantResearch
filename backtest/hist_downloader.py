@@ -66,7 +66,7 @@ def save(df, fn):
 def run(args):
     current_path = os.path.dirname(os.path.abspath(__file__))
     hist_path = os.path.join(current_path, '..', 'data')
-    end_date = datetime.today()
+    end_date = datetime.now()
     #start_date = end_date + timedelta(days=-5 * 365)
     start_date = datetime(2006, 1, 1)
 
@@ -170,7 +170,7 @@ def run(args):
 
         print('Downloading fundamentals .............')
         outfile = os.path.join(hist_path, 'all_stocks.pkl')
-        dict_all_stocks = dict()
+        dict_all_stocks = {}
         if os.path.isfile(outfile):
             with open(outfile, 'rb') as f:
                 dict_all_stocks = pickle.load(f)
@@ -181,7 +181,7 @@ def run(args):
         for idx, r in df_stocks.iterrows():
             s = r.iloc[0]
             if s not in dict_all_stocks.keys():
-                dict_all_stocks[s] = dict()
+                dict_all_stocks[s] = {}
 
             if field in dict_all_stocks[s].keys():
                 df_old = dict_all_stocks[s][field]
@@ -213,7 +213,7 @@ def run(args):
         finwiz_url = 'https://finviz.com/quote.ashx?t='
 
         outfile = os.path.join(hist_path, 'all_stocks.pkl')
-        dict_all_stocks = dict()
+        dict_all_stocks = {}
         if os.path.isfile(outfile):
             with open(outfile, 'rb') as f:
                 dict_all_stocks = pickle.load(f)
@@ -222,7 +222,7 @@ def run(args):
         for idx, r in df_stocks.iterrows():
             s = r.iloc[0]
             if s not in dict_all_stocks.keys():
-                dict_all_stocks[s] = dict()
+                dict_all_stocks[s] = {}
 
             if field in dict_all_stocks[s].keys():
                 list_old = dict_all_stocks[s][field]

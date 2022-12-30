@@ -230,7 +230,6 @@ if __name__ == '__main__':
                 positions=df_positions,
                 transactions=df_trades,
                 round_trips=False)
-            plt.show()
         else:
             f1 = plt.figure(1)
             pf.plot_rolling_returns(strat_ret, factor_returns=bm_ret)
@@ -252,4 +251,4 @@ if __name__ == '__main__':
             f6.show()
             f7 = plt.figure(7)
             pf.plot_monthly_returns_dist(strat_ret)
-            plt.show()
+        plt.show()

@@ -22,7 +22,7 @@ def download_treasury_curve_from_quandl(misc_dict: Dict) -> None:
         :return:
         """
     start_date = datetime(2010, 1, 1)
-    end_date = datetime.today()
+    end_date = datetime.now()
     start_date = end_date + timedelta(days=-global_settings.lookback_days)
 
     df = quandl.get('USTREASURY/YIELD', start_date=start_date, end_date=end_date,
@@ -52,19 +52,23 @@ def download_vix_from_quandl(misc_dict: Dict) -> None:
         :return:
         """
     start_date = datetime(2010, 1, 1)
-    end_date = datetime.today()
+    end_date = datetime.now()
     start_date = end_date + timedelta(days=-global_settings.lookback_days)
 
     for i in range(1, 10):
-        df = quandl.get('CHRIS/CBOE_VX'+str(i), start_date=start_date, end_date=end_date,
-                        authtoken=global_settings.quandl_auth)
+        df = quandl.get(
+            f'CHRIS/CBOE_VX{str(i)}',
+            start_date=start_date,
+            end_date=end_date,
+            authtoken=global_settings.quandl_auth,
+        )
     # for c in misc_dict['PCR:VIX'].columns:
     #         misc_dict['PCR:VIX'][c] = misc_dict['PCR:VIX'][c].astype(np.int64)
 
 
 # https://markets.cboe.com/us/options/market_statistics/daily/
 def download_option_stats_from_cboe(misc_dict: Dict) -> None:
-    end_date = datetime.today()
+    end_date = datetime.now()
     date_list = [end_date - timedelta(days=x) for x in range(global_settings.lookback_days)]
     symbols = ['CBOE VOLATILITY INDEX (VIX)', 'SPX + SPXW', 'INDEX OPTIONS']
     symbols_not = ['CBOE VOLATILITY INDEX (VIX) PUT/CALL RATIO', 'SPX + SPXW PUT/CALL RATIO', 'INDEX PUT/CALL RATIO']
@@ -88,28 +92,30 @@ def download_option_stats_from_cboe(misc_dict: Dict) -> None:
                         df.columns = df.iloc[0]
                         df.set_index(df.columns[0], inplace=True)
 
-                        row_dict = {}
-                        row_dict['CV'] = np.int64(df.loc['VOLUME', 'CALL'])
+                        row_dict = {'CV': np.int64(df.loc['VOLUME', 'CALL'])}
                         row_dict['PV'] = np.int64(df.loc['VOLUME', 'PUT'])
                         row_dict['COI'] = np.int64(df.loc['OPEN INTEREST', 'CALL'])
                         row_dict['POI'] = np.int64(df.loc['OPEN INTEREST', 'PUT'])
                         df_row = pd.DataFrame(row_dict, index=[target_date.date()])
 
                         if sym_idx == 0:
-                            if 'PCR:SPX' in misc_dict.keys():
-                                misc_dict['PCR:VIX'] = df_row.combine_first(misc_dict['PCR:VIX'])
-                            else:
-                                misc_dict['PCR:VIX'] = df_row
+                            misc_dict['PCR:VIX'] = (
+                                df_row.combine_first(misc_dict['PCR:VIX'])
+                                if 'PCR:SPX' in misc_dict.keys()
+                                else df_row
+                            )
                         elif sym_idx == 1:
-                            if 'PCR:SPX' in misc_dict.keys():
-                                misc_dict['PCR:SPX'] = df_row.combine_first(misc_dict['PCR:SPX'])
-                            else:
-                                misc_dict['PCR:SPX'] = df_row
+                            misc_dict['PCR:SPX'] = (
+                                df_row.combine_first(misc_dict['PCR:SPX'])
+                                if 'PCR:SPX' in misc_dict.keys()
+                                else df_row
+                            )
                         elif sym_idx == 2:
-                            if 'PCR:INDEX' in misc_dict.keys():
-                                misc_dict['PCR:INDEX'] = df_row.combine_first(misc_dict['PCR:INDEX'])
-                            else:
-                                misc_dict['PCR:INDEX'] = df_row
+                            misc_dict['PCR:INDEX'] = (
+                                df_row.combine_first(misc_dict['PCR:INDEX'])
+                                if 'PCR:INDEX' in misc_dict.keys()
+                                else df_row
+                            )
                 except:
                     continue
             time.sleep(1)

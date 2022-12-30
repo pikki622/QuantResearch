@@ -26,20 +26,7 @@ def generate_html(today):
     title = '<h3>Baker Hughes Rig Count</h3>'
     body = df.to_html(border=None)
 
-    # url = 'https://rigcount.bakerhughes.com/na-rig-count'
-    # page = requests.get(url)
-    # content = page.content.decode('utf-8')
-    # soup = BeautifulSoup(page.content, 'html.parser')
-    # table = soup.find_all('table')[0]
-    # # df = pd.read_html(str(table))
-    # link = table.findAll('a')[0]
-    # link = link.get('href')
-    # print(link)
-    # data = pd.read_excel(link, sheet_name='Current Weekly Summary')       # not working, it's a redirect
-
-    # --------------------------------------- Create and Send out HTML ------------------------------------------------- #
-
-    html_string = f'''
+    return f'''
     <html>
         <head>
             <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
@@ -70,5 +57,3 @@ def generate_html(today):
             <div>{body}</div>
         </body>
     </html>'''
-
-    return html_string

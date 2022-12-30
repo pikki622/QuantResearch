@@ -77,7 +77,7 @@ def get_generic_futures_hist_data(actual_futures_hist_data: pd.DataFrame, meta_d
     roll_idx_previous = 0
 
     try:
-        for idx in range(dateidx+1):           # contracts expired up to first non-expired included
+        for idx in range(dateidx+1):   # contracts expired up to first non-expired included
             # cut at this point, between here and previous cut, they are the 60 generic contracts for this date range
             roll_idx = actual_futures_hist_data.index.searchsorted(meta_data['Last_Trade_Date'].iloc[idx])       # first expired contract, last trade date
             try:
@@ -86,16 +86,15 @@ def get_generic_futures_hist_data(actual_futures_hist_data: pd.DataFrame, meta_d
                 actual_contracts_existed = set(actual_contracts).intersection(set(actual_futures_hist_data.columns))
                 actual_contracts_non_existed = set(actual_contracts).difference(set(actual_futures_hist_data.columns))
 
-                if len(actual_contracts_existed) == 0:         # no contract existed
+                if not actual_contracts_existed:
                     continue
-                else:
-                    temp_df = actual_futures_hist_data.iloc[roll_idx_previous:roll_idx+1][list(actual_contracts_existed)]
-                    if len(actual_contracts_non_existed) > 0:
-                        empty_temp_df = pd.DataFrame(np.nan, temp_df.index,  columns=list(actual_contracts_non_existed))
-                        temp_df = pd.concat([temp_df, empty_temp_df], axis=1, join='outer', sort=True)
+                temp_df = actual_futures_hist_data.iloc[roll_idx_previous:roll_idx+1][list(actual_contracts_existed)]
+                if actual_contracts_non_existed:
+                    empty_temp_df = pd.DataFrame(np.nan, temp_df.index,  columns=list(actual_contracts_non_existed))
+                    temp_df = pd.concat([temp_df, empty_temp_df], axis=1, join='outer', sort=True)
 
-                    temp_df = temp_df[list(actual_contracts)]
-                    temp_df.columns = [root_sym+str(c+1) for c in range(n_contracts)]
+                temp_df = temp_df[list(actual_contracts)]
+                temp_df.columns = [root_sym+str(c+1) for c in range(n_contracts)]
                 generic_data_df = generic_data_df.append(temp_df)
             except:
                 logging.error(root_sym + ' generic error')
@@ -121,16 +120,14 @@ def get_seasonal_contracts(futures_asofdate: pd.Timestamp, contracts: List[str],
     # e.g. (12/1/2018, CLH2020), (12/1/2017, CLH2019), ...., 
     # the first one is not complete/ not yet expired as of 12/1/2019, while the second one is complete/expired.
     yrs_back = 0
-    anchor_days = []
-    anchor_contracts = []
-    anchor_days.append(futures_asofdate)             # 12/1/2019
-    anchor_contracts.append(contracts[0])            # CLH2021
+    anchor_days = [futures_asofdate]
+    anchor_contracts = [contracts[0]]
     last_complete_yr = None
     while True:
         try:
             anchor_contract = str(int(anchor_contracts[-1][-2:]) - 1)
             if len(anchor_contract) == 1:
-                anchor_contract = '0' + anchor_contract           # CLH10 ==> CLH09  padding 0
+                anchor_contract = f'0{anchor_contract}'
             anchor_contract = anchor_contracts[-1][:-2] + anchor_contract
             anchor_day = anchor_days[-1]
             anchor_day = anchor_day.replace(year=anchor_day.year - 1)
@@ -148,25 +145,26 @@ def get_seasonal_contracts(futures_asofdate: pd.Timestamp, contracts: List[str],
 
     s = pd.DataFrame()
     final_index = None
+    j = abs(last_complete_yr)         # j=2
     for i in range(len(anchor_days)):
         # for i in range(len(anchor_days)-1, -1, -1):
         anchor_day = anchor_days[i]
         c1 = str(int(contracts[0][-2:]) - i)
         if len(c1) == 1:
-            c1 = '0' + c1
+            c1 = f'0{c1}'
         c1 = contracts[0][:-2] + c1
         s1 = hist_data[c1]
 
         if (len(contracts) > 1):
             c2 = str(int(contracts[1][-2:]) - i)
             if len(c2) == 1:
-                c2 = '0' + c2
+                c2 = f'0{c2}'
             c2 = contracts[1][:-2] + c2
             s2 = hist_data[c2]
             if (len(contracts) > 2):
                 c3 = str(int(contracts[2][-2:]) - i)
                 if len(c3) == 1:
-                    c3 = '0' + c3
+                    c3 = f'0{c3}'
                 c3 = contracts[2][:-2] + c3
                 s3 = hist_data[c3]
                 combo = s1 * weights[0] + s2 * weights[1] + s3 * weights[2]
@@ -178,7 +176,6 @@ def get_seasonal_contracts(futures_asofdate: pd.Timestamp, contracts: List[str],
             combo = s1 * weights[0]
             combo.name = c1
 
-        j = abs(last_complete_yr)         # j=2
         if i < j:         # when i=0, (12/1/2019, CLH2021) is not complete or expired, i=1, (12/1/2018, CLH2020) is not complete or expired ==> need to append nan
             anchor_day_j = anchor_days[j - i]            # when i=0, days_to_go between (12/1/2019, CLH21)==(12/1/2017, CLH19), when i=1, days_to_go betwen (12/1/2018, CLH20)==(12/1/2017, CLH19)
             anchor_contract_j = anchor_contracts[j]

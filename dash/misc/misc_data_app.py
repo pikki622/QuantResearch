@@ -144,16 +144,13 @@ def update_datatable_market_misc_data(item_selected):
 def update_historical_data_plot_markete_misc_data(item_selected, n_clicks, is_cross_sectional, ione, itwo, ithree, ifour, ifive):
     print(is_cross_sectional)
 
-    if is_cross_sectional == 'Time-Series':
-        try:
+    try:
+        if is_cross_sectional == 'Time-Series':
             return plot_time_series_market_misc_data(item_selected, ione)
-        except:
-            return None
-    else:
-        try:
+        else:
             return plot_cross_sectional_market_misc_data(item_selected, ione, itwo, ithree, ifour, ifive)
-        except:
-            return None
+    except:
+        return None
 
 
 def plot_time_series_market_misc_data(item_selected, lookback_window):
@@ -250,36 +247,36 @@ def plot_cross_sectional_market_misc_data(item_selected, ione, itwo, ithree, ifo
     s0 = df.loc[asofdate]
     s = s0.to_frame()
 
-    if (ione is not None) and (not not ione):
-        t1 = convert_date_input(ione, datetime.today())
+    if ione is not None and ione:
+        t1 = convert_date_input(ione, datetime.now())
         t1 = t1.date()
         dateidx1 = df.index.searchsorted(t1)  # first one greater than or equal to
         s1 = df.iloc[dateidx1]
         s = pd.concat([s, s1], axis=1)
 
-    if (itwo is not None) and (not not itwo):
-        t2 = convert_date_input(itwo, datetime.today())
+    if itwo is not None and itwo:
+        t2 = convert_date_input(itwo, datetime.now())
         t2 = t2.date()
         dateidx2 = df.index.searchsorted(t2)  # first one greater than or equal to
         s2 = df.iloc[dateidx2]
         s = pd.concat([s, s2], axis=1)
 
-    if (ithree is not None) and (not not ithree):
-        t3 = convert_date_input(ithree, datetime.today())
+    if ithree is not None and ithree:
+        t3 = convert_date_input(ithree, datetime.now())
         t3 = t3.date()
         dateidx3 = df.index.searchsorted(t3)  # first one greater than or equal to
         s3 = df.iloc[dateidx3]
         s = pd.concat([s, s3], axis=1)
 
-    if (ifour is not None) and (not not ifour):
-        t4 = convert_date_input(ifour, datetime.today())
+    if ifour is not None and ifour:
+        t4 = convert_date_input(ifour, datetime.now())
         t4 = t4.date()
         dateidx4 = df.index.searchsorted(t4)  # first one greater than or equal to
         s4 = df.iloc[dateidx4]
         s = pd.concat([s, s4], axis=1)
 
-    if (ifive is not None) and (not not ifive):
-        t5 = convert_date_input(ifive, datetime.today())
+    if ifive is not None and ifive:
+        t5 = convert_date_input(ifive, datetime.now())
         t5 = t5.date()
         dateidx5 = df.index.searchsorted(t5)  # first one greater than or equal to
         s5 = df.iloc[dateidx5]

@@ -21,7 +21,7 @@ P_0_0 = W
 
 results = np.zeros([250, 2])
 for k in range(250):          # 250 pairs
-    print('step {}'.format(k))
+    print(f'step {k}')
     # A-Priori prediction
     # first step, let k = 1
     theta_1_0 = theta_0_0

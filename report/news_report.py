@@ -67,7 +67,7 @@ def reset_new_day():
 
 def run(args):
     global  df_schedule
-    today = datetime.today()
+    today = datetime.now()
 
     # email_body = cpi.generate_html(today)
     # send_email('cpi', email_body)
@@ -87,7 +87,7 @@ def run(args):
                 try:
                     email_body = eval(f'{row.module}.generate_html(now)')
                 except Exception as e:
-                    print(str(e))
+                    print(e)
                     email_body = None
 
                 if email_body is not None:

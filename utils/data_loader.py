@@ -14,12 +14,12 @@ def load_stocks_hist_prices():
     read stocks historical prices from h5
     :return:
     """
-    stocks_hist_prices_dict = dict()
+    stocks_hist_prices_dict = {}
     if os.path.isfile(os.path.join(global_settings.root_path, 'data/stocks_historical_prices.h5')):
         with h5py.File(os.path.join(global_settings.root_path, 'data/stocks_historical_prices.h5'), 'r') as f:
             for k in f.keys():
                 stocks_hist_prices_dict[k] = None
-    for k in stocks_hist_prices_dict.keys():
+    for k in stocks_hist_prices_dict:
         stocks_hist_prices_dict[k] = pd.read_hdf(os.path.join(global_settings.root_path, 'data/stocks_historical_prices.h5'), key=k)
     stocks_asofdate = stocks_hist_prices_dict['SPX'].index[-1]
     return stocks_hist_prices_dict, stocks_asofdate
@@ -53,8 +53,8 @@ def load_futures_meta(root: str = None) -> pd.DataFrame:
     """
     df_futures_contracts_meta = pd.read_csv(os.path.join(global_settings.root_path, 'data/config/futures_contract_meta.csv'), index_col=0, keep_default_na=False)
     df_futures_contracts_meta['Last_Trade_Date'] = pd.to_datetime(df_futures_contracts_meta['Last_Trade_Date'])
-    
-    if not root is None:
+
+    if root is not None:
         try:
             df_futures_contracts_meta = df_futures_contracts_meta[df_futures_contracts_meta.Root==root]
         except:
@@ -70,12 +70,12 @@ def load_futures_hist_prices(root: str = None) -> Union[Dict, pd.DataFrame]:
     """
     # cache_dir = os.path.dirname(os.path.realpath(__file__))
     if root is None:
-        futures_hist_prices_dict = dict()
+        futures_hist_prices_dict = {}
         if os.path.isfile(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5')):
             with h5py.File(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'), 'r') as f:
                 for k in f.keys():
                     futures_hist_prices_dict[k] = None
-        for k in futures_hist_prices_dict.keys():
+        for k in futures_hist_prices_dict:
             futures_hist_prices_dict[k] = pd.read_hdf(os.path.join(global_settings.root_path, 'data/futures_historical_prices.h5'), key=k)
         #futures_asofdate = futures_hist_prices_dict['CL'].index[-1]
         return futures_hist_prices_dict
@@ -88,12 +88,12 @@ def load_futures_hist_prices(root: str = None) -> Union[Dict, pd.DataFrame]:
 
 
 def load_inter_comdty_spread_hist_prices() -> Dict:
-    inter_comdty_spread_hist_data_dict = dict()
+    inter_comdty_spread_hist_data_dict = {}
     if os.path.isfile(os.path.join(global_settings.root_path, 'data/inter_comdty_spread_historical_prices.h5')):
         with h5py.File(os.path.join(global_settings.root_path, 'data/inter_comdty_spread_historical_prices.h5'), 'r') as f:
             for k in f.keys():
                 inter_comdty_spread_hist_data_dict[k] = None
-    for k in inter_comdty_spread_hist_data_dict.keys():
+    for k in inter_comdty_spread_hist_data_dict:
         inter_comdty_spread_hist_data_dict[k] = pd.read_hdf(os.path.join(global_settings.root_path, 'data/inter_comdty_spread_historical_prices.h5'), key=k)
     return inter_comdty_spread_hist_data_dict
 
@@ -103,12 +103,12 @@ def load_comdty_generic_hist_prices() -> Dict:
     construct generic prices series on the fly
     :return:
     """
-    generic_futures_hist_prices_dict = dict()
+    generic_futures_hist_prices_dict = {}
     if os.path.isfile(os.path.join(global_settings.root_path, 'data/futures_generic_historical_prices.h5')):
         with h5py.File(os.path.join(global_settings.root_path, 'data/futures_generic_historical_prices.h5'), 'r') as f:
             for k in f.keys():
                 generic_futures_hist_prices_dict[k] = None
-    for k in generic_futures_hist_prices_dict.keys():
+    for k in generic_futures_hist_prices_dict:
         generic_futures_hist_prices_dict[k] = pd.read_hdf(os.path.join(global_settings.root_path, 'data/futures_generic_historical_prices.h5'), key=k)
     return generic_futures_hist_prices_dict
 
@@ -118,45 +118,45 @@ def load_inter_comdty_generic_hist_prices() -> Dict:
     construct generic prices series on the fly
     :return:
     """
-    generic_inter_comdty_hist_prices_dict = dict()
+    generic_inter_comdty_hist_prices_dict = {}
     if os.path.isfile(os.path.join(global_settings.root_path, 'data/inter_comdty_spread_generic_historical_prices.h5')):
         with h5py.File(os.path.join(global_settings.root_path, 'data/inter_comdty_spread_generic_historical_prices.h5'), 'r') as f:
             for k in f.keys():
                 generic_inter_comdty_hist_prices_dict[k] = None
-    for k in generic_inter_comdty_hist_prices_dict.keys():
+    for k in generic_inter_comdty_hist_prices_dict:
         generic_inter_comdty_hist_prices_dict[k] = pd.read_hdf(os.path.join(global_settings.root_path, 'data/inter_comdty_spread_generic_historical_prices.h5'), key=k)
     return generic_inter_comdty_hist_prices_dict
 
 
 def load_spread_score() -> Dict:
-    spread_score_dict = dict()
+    spread_score_dict = {}
     if os.path.isfile(os.path.join(global_settings.root_path, 'data/spread_scores.h5')):
         with h5py.File(os.path.join(global_settings.root_path, 'data/spread_scores.h5'), 'r') as f:
             for k in f.keys():
                 spread_score_dict[k] = None
-    for k in spread_score_dict.keys():
+    for k in spread_score_dict:
         spread_score_dict[k] = pd.read_hdf(os.path.join(global_settings.root_path, 'data/spread_scores.h5'), key=k)
     return spread_score_dict
 
 
 def load_fly_score() -> Dict:
-    fly_score_dict = dict()
+    fly_score_dict = {}
     if os.path.isfile(os.path.join(global_settings.root_path, 'data/fly_scores.h5')):
         with h5py.File(os.path.join(global_settings.root_path, 'data/fly_scores.h5'), 'r') as f:
             for k in f.keys():
                 fly_score_dict[k] = None
-    for k in fly_score_dict.keys():
+    for k in fly_score_dict:
         fly_score_dict[k] = pd.read_hdf(os.path.join(global_settings.root_path, 'data/fly_scores.h5'), key=k)
     return fly_score_dict
 
 
 def load_misc() -> Dict:
-    misc_dict = dict()
+    misc_dict = {}
     if os.path.isfile(os.path.join(global_settings.root_path, 'data/misc.h5')):
         with h5py.File(os.path.join(global_settings.root_path, 'data/misc.h5'), 'r') as f:
             for k in f.keys():
                 misc_dict[k] = None
-    for k in misc_dict.keys():
+    for k in misc_dict:
         try:
             misc_dict[k] = pd.read_hdf(os.path.join(global_settings.root_path, 'data/misc.h5'), key=k)
         except:

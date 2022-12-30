@@ -39,19 +39,17 @@ for episode in range(total_episodes):
     done = False
     total_rewards = 0
 
-    for step in range(max_steps):
+    for _ in range(max_steps):
         # 3. Choose an action a in the current world state (s)
         ## First we randomize a number
         exp_exp_tradeoff = random.uniform(0, 1)
 
         ## If this number > greater than epsilon --> exploitation (taking the biggest Q value for this state)
-        if exp_exp_tradeoff > epsilon:
-            action = np.argmax(qtable[state, :])
-
-        # Else doing a random choice --> exploration
-        else:
-            action = env.action_space.sample()
-
+        action = (
+            np.argmax(qtable[state, :])
+            if exp_exp_tradeoff > epsilon
+            else env.action_space.sample()
+        )
         # Take the action (a) and observe the outcome state(s') and reward (r)
         new_state, reward, done, info = env.step(action)
 
@@ -73,7 +71,7 @@ for episode in range(total_episodes):
     epsilon = min_epsilon + (max_epsilon - min_epsilon) * np.exp(-decay_rate * episode)
     rewards.append(total_rewards)
 
-print("Score over time: " + str(sum(rewards) / total_episodes))
+print(f"Score over time: {str(sum(rewards) / total_episodes)}")
 print(qtable)
 
 

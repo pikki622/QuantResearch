@@ -74,7 +74,7 @@ if __name__ == '__main__':
     df_obs, df_exch = load_data()
 
     trading_env = PortfolioEnv(df_obs, df_exch)
-    trading_env.set_cash(cash)
+    trading_env.set_cash(max_nav_scaler)
     trading_env.set_commission(0.0001)
     trading_env.set_steps(n_lookback=10, n_warmup=50, n_maxsteps=250)
     trading_env.set_feature_scaling(max_nav_scaler)

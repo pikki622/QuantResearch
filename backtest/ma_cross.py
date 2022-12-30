@@ -59,12 +59,16 @@ class MACross(qt.StrategyBase):
         if current_price > sma and self.current_position <= 0:
             target_size = int((self._position_manager.cash + self.current_position * df_hist['Close'].iloc[-1])/df_hist['Close'].iloc[-1])       # buy to notional
             self.adjust_position(symbol, size_from=self.current_position, size_to=target_size, timestamp=self.current_time)
-            print("Long: %s, sma %s, price %s, trade %s, new position %s" % (self.current_time, str(sma), str(current_price), str(target_size-self.current_position), str(target_size)))
+            print(
+                f"Long: {self.current_time}, sma {str(sma)}, price {str(current_price)}, trade {str(target_size - self.current_position)}, new position {target_size}"
+            )
             self.current_position = target_size
         elif current_price < sma and self.current_position >= 0:
             target_size = int((self._position_manager.cash + self.current_position * df_hist['Close'].iloc[-1])/df_hist['Close'].iloc[-1])*(-1)    # sell to notional
             self.adjust_position(symbol, size_from=self.current_position, size_to=target_size, timestamp=self.current_time)
-            print("Short: %s, sma %s, price %s, trade %s, new position %s" % (self.current_time, str(sma), str(current_price), str(target_size-self.current_position), str(target_size)))
+            print(
+                f"Short: {self.current_time}, sma {str(sma)}, price {str(current_price)}, trade {str(target_size - self.current_position)}, new position {str(target_size)}"
+            )
             self.current_position = target_size
 
 
@@ -116,10 +120,8 @@ if __name__ == '__main__':
         test_start_date = eastern.localize(datetime(2020, 8, 24, 22, 0, 0))
         test_end_date = eastern.localize(datetime(2020, 8, 24, 22, 30, 0))
 
-    if do_optimize:          # parallel parameter search
-        params_list = []
-        for lk in [10, 20, 30, 50, 100, 200]:
-            params_list.append({'lookback': lk})
+    if do_optimize:      # parallel parameter search
+        params_list = [{'lookback': lk} for lk in [10, 20, 30, 50, 100, 200]]
         target_name = 'Sharpe ratio'
         manager = multiprocessing.Manager()
         return_dict = manager.dict()
@@ -162,10 +164,13 @@ if __name__ == '__main__':
         # ------------------------- Evaluation and Plotting -------------------------------------- #
         strat_ret = ds_equity.pct_change().dropna()
         strat_ret.name = 'strat'
-        if not is_intraday:
-            bm = qt.util.read_ohlcv_csv(os.path.join('../data/', f'{benchmark}.csv'))
-        else:
-            bm = data      # buy and hold
+        bm = (
+            data
+            if is_intraday
+            else qt.util.read_ohlcv_csv(
+                os.path.join('../data/', f'{benchmark}.csv')
+            )
+        )
         bm_ret = bm['Close'].pct_change().dropna()
         bm_ret.index = pd.to_datetime(bm_ret.index)
         bm_ret = bm_ret[strat_ret.index]
@@ -245,5 +250,5 @@ if __name__ == '__main__':
             trades_details = pf.create_round_trip_tear_sheet(strat_ret, df_positions, df_trades)
             plt.show()
             print(trades_details)
-            trades_details.to_csv('{}{}{}'.format('./output', '/trades_details_', '.csv'))
+            trades_details.to_csv('./output/trades_details_.csv')
             # data.to_csv('{}{}{}'.format('./output', '/data_', '.csv'))

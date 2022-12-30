@@ -76,7 +76,10 @@ y = tf.placeholder(tf.float32, [None, n_outputs])                           # (?
 # y_pred_MLP = tf.contrib.layers.fully_connected(hidden2, n_outputs, activation_fn=tf.nn.elu)     # (?, 1)
 
 # Basic RNN Cell
-layers = [tf.contrib.rnn.BasicRNNCell(num_units=n_neurons, activation=tf.nn.elu) for layer in range(n_layers)]
+layers = [
+    tf.contrib.rnn.BasicRNNCell(num_units=n_neurons, activation=tf.nn.elu)
+    for _ in range(n_layers)
+]
 
 # Basic LSTM Cell
 # layers = [tf.nn.rnn_cell.LSTMCell(name='basic_lstm_cell', num_units=n_neurons, activation=tf.nn.elu) for layer in range(n_layers)]
@@ -105,7 +108,7 @@ model_saver = tf.train.Saver()
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     for epoch in range(n_epochs):
-        for iteration in range(n_train_set_size // batch_size):
+        for _ in range(n_train_set_size // batch_size):
             x_batch, y_batch = get_next_batch(batch_size) # fetch the next training batch
             #[a1, a2, a3, a4] = sess.run([rnn_outputs, states, y_pred, training_op], feed_dict={X: x_batch, y: y_batch})
             sess.run(training_op, feed_dict={X: x_batch, y: y_batch})

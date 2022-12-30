@@ -107,9 +107,7 @@ def volume_profile(df, price_pace=0.25, return_raw=False):
         ),
     )
 
-    fig = go.Figure(data=[fig1, fig2, fig3], layout=layout)
-
-    return fig
+    return go.Figure(data=[fig1, fig2, fig3], layout=layout)
 
 
 def market_profile(df, price_pace=0.25, time_pace='30T', return_raw=False):
@@ -133,16 +131,13 @@ def market_profile(df, price_pace=0.25, time_pace='30T', return_raw=False):
     price_coors = pd.Series(price_buckets).rolling(2).mean().dropna()
     df_agg = df.resample(time_pace).agg({'High': 'max', 'Low': 'min'})
     tpo_bars = np.zeros([price_buckets.shape[0] - 1, df_agg.shape[0]], dtype=np.int32)
-    j = 0
-    for idx, row in df_agg.iterrows():
+    for j, (idx, row) in enumerate(df_agg.iterrows()):
         time_bars = np.histogram([row.Low, row.High], bins=price_buckets)[0]
         result = np.where(time_bars == 1)[0]
         if result.shape[0] == 2:
             time_bars[result[0]:result[1] + 1] = 1
 
         tpo_bars[:, j] = time_bars
-        j += 1
-
     if return_raw:
         return (price_coors.values, tpo_bars)
 

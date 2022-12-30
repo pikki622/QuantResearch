@@ -9,13 +9,13 @@ from pykalman import KalmanFilter
 
 #################################################### Data #####################################################
 sym_a = 'EWA US Equity'
-hist_file = os.path.join('hist/', '%s.csv' % sym_a)
+hist_file = os.path.join('hist/', f'{sym_a}.csv')
 ewa_price = pd.read_csv(hist_file, header=0, parse_dates=True, sep=',', index_col=0)
 ewa_price = ewa_price['Price']
 ewa_price.name = sym_a
 
 sym_b = 'EWC US Equity'
-hist_file = os.path.join('hist/', '%s.csv' % sym_b)
+hist_file = os.path.join('hist/', f'{sym_b}.csv')
 ewc_price = pd.read_csv(hist_file, header=0, parse_dates=True, sep=',', index_col=0)
 ewc_price = ewc_price['Price']
 ewc_price.name = sym_b
@@ -55,9 +55,6 @@ beta_kf = pd.DataFrame({'Slope': state_means[:, 0], 'Intercept': state_means[:, 
 beta_kf.plot(subplots=True)
 plt.show()
 
-# ------------------------------------This should be equivalent to above --------------------------------------------#
-means_trace = []
-covs_trace = []
 step = 0
 x = data[sym_a][step]
 y = data[sym_b][step]
@@ -75,10 +72,8 @@ kf = KalmanFilter(n_dim_obs=1, n_dim_state=2,
 # spread_std = np.sqrt(observation_matrix_stepwise.dot(P).dot(observation_matrix_stepwise.transpose())[0][0] + observation_cov)
 # print(spread, spread_std)
 state_means_stepwise, state_covs_stepwise = kf.filter(observation_stepwise)             # depend on y
-# print(state_means_stepwise, state_covs_stepwise)
-means_trace.append(state_means_stepwise[0])
-covs_trace.append(state_covs_stepwise[0])
-
+means_trace = [state_means_stepwise[0]]
+covs_trace = [state_covs_stepwise[0]]
 for step in range(1, data.shape[0]):
     # print(step)
     x = data[sym_a][step]
